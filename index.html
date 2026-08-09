@@ -1203,7 +1203,8 @@ button{
           });
         }
 
-	const previousLesson = lesson;
+	const previousBlock = currentBlock;
+	const previousLesson = currentLesson;
 
 	closeModal();
 	await loadDataFromFirebase();
