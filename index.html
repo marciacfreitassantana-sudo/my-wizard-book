@@ -13,7 +13,7 @@
       theme: {
         extend: {
           colors: {
-            wizard: { red: '#e11d48', blue: '#0284c7', purple: '#7c3aed', dark: '#0f172a' }
+            wizard: { blue: '#2563eb', dark: '#05070a' }
           }
         }
       }
@@ -28,7 +28,7 @@
   <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40">
     <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
       <div class="flex items-center gap-3 cursor-pointer shrink-0" onclick="showBlockGrid()">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-600 to-purple-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-red-500/20">W</div>
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-blue-500/20">W</div>
         <div class="hidden sm:block">
           <h1 class="font-bold text-lg leading-tight text-white">My Wizard Book</h1>
           <p class="text-[10px] text-slate-400 font-medium" id="stat-cloud-status">Conectando ao Firebase...</p>
@@ -39,17 +39,17 @@
       <div class="flex-1 max-w-md relative">
         <div class="relative flex items-center">
           <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none"></i>
-          <input type="text" id="global-search" placeholder="Buscar palavra ou pronúncia..." oninput="handleSearch(this.value)" class="w-full bg-slate-950 border border-slate-800 focus:border-red-500 text-white placeholder-slate-500 text-xs rounded-xl pl-9 pr-8 py-2.5 outline-none transition" />
+          <input type="text" id="global-search" placeholder="Buscar palavra ou pronúncia..." oninput="handleSearch(this.value)" class="w-full bg-slate-950 border border-slate-800 focus:border-blue-500 text-white placeholder-slate-500 text-xs rounded-xl pl-9 pr-8 py-2.5 outline-none transition" />
           <button id="clear-search-btn" onclick="clearSearch()" class="hidden absolute right-3 text-slate-500 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
       </div>
 
       <!-- AÇÕES -->
       <div class="flex items-center gap-2 shrink-0">
-        <button onclick="openPracticeModal()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-lg shadow-emerald-600/20 flex items-center gap-1.5">
+        <button onclick="openPracticeModal()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-lg shadow-blue-600/20 flex items-center gap-1.5">
           <i data-lucide="gamepad-2" class="w-4 h-4"></i> Praticar
         </button>
-        <button onclick="openModal()" class="px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs transition shadow-lg shadow-red-600/20 flex items-center gap-1.5">
+        <button onclick="openModal()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-lg shadow-blue-600/20 flex items-center gap-1.5">
           <i data-lucide="plus" class="w-4 h-4"></i> Cadastrar
         </button>
       </div>
@@ -63,7 +63,7 @@
     <section id="view-search-results" class="hidden space-y-6">
       <div class="flex items-center justify-between border-b border-slate-800 pb-4">
         <div>
-          <h2 class="text-xl font-black text-white flex items-center gap-2"><i data-lucide="search" class="w-5 h-5 text-red-500"></i> Resultados</h2>
+          <h2 class="text-xl font-black text-white flex items-center gap-2"><i data-lucide="search" class="w-5 h-5 text-blue-500"></i> Resultados</h2>
           <p class="text-xs text-slate-400" id="search-count-label">Buscando...</p>
         </div>
         <button onclick="clearSearch()" class="text-xs font-bold text-slate-400 hover:text-white flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar</button>
@@ -77,7 +77,7 @@
       <!-- CARDS DE ESTATÍSTICAS GERAIS -->
       <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center shrink-0">
+          <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
             <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
           </div>
           <div>
@@ -87,17 +87,17 @@
         </div>
 
         <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+          <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
             <i data-lucide="target" class="w-6 h-6"></i>
           </div>
           <div>
             <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Média de Acertos</p>
-            <p class="text-2xl font-black text-emerald-400" id="stat-avg-accuracy">0%</p>
+            <p class="text-2xl font-black text-blue-400" id="stat-avg-accuracy">0%</p>
           </div>
         </div>
 
         <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center shrink-0">
+          <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
             <i data-lucide="check-circle-2" class="w-6 h-6"></i>
           </div>
           <div>
@@ -119,8 +119,8 @@
       <!-- HISTÓRICO DE TREINOS -->
       <section class="bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-4">
         <div class="flex items-center justify-between">
-          <h3 class="text-base font-bold text-white flex items-center gap-2"><i data-lucide="history" class="w-4 h-4 text-sky-400"></i> Últimos Treinos</h3>
-          <button onclick="clearHistory()" class="text-[11px] text-slate-500 hover:text-rose-400 font-bold transition">Limpar Histórico</button>
+          <h3 class="text-base font-bold text-white flex items-center gap-2"><i data-lucide="history" class="w-4 h-4 text-blue-400"></i> Últimos Treinos</h3>
+          <button onclick="clearHistory()" class="text-[11px] text-slate-500 hover:text-blue-400 font-bold transition">Limpar Histórico</button>
         </div>
         <div id="history-container" class="space-y-2"></div>
       </section>
@@ -142,19 +142,19 @@
       </div>
 
       <div class="space-y-6">
-        <div class="bg-slate-900 border border-sky-800/60 rounded-2xl overflow-hidden shadow-xl">
-          <div class="bg-sky-700 px-4 py-2.5"><h3 class="font-black text-sm tracking-wider uppercase text-white">VERBS</h3></div>
+        <div class="bg-slate-900 border border-blue-800/60 rounded-2xl overflow-hidden shadow-xl">
+          <div class="bg-blue-700 px-4 py-2.5"><h3 class="font-black text-sm tracking-wider uppercase text-white">VERBS</h3></div>
           <div class="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="container-verbs"></div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl flex flex-col">
-            <div class="bg-sky-600 px-4 py-2.5"><h3 class="font-black text-sm tracking-wider uppercase text-white">NEW WORDS</h3></div>
+            <div class="bg-blue-600 px-4 py-2.5"><h3 class="font-black text-sm tracking-wider uppercase text-white">NEW WORDS</h3></div>
             <div class="p-4 space-y-2.5 flex-1 divide-y divide-slate-800/60" id="container-words"></div>
           </div>
           <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl space-y-4 p-4">
             <div>
-              <div class="bg-purple-700 px-4 py-2 rounded-xl mb-3"><h3 class="font-black text-sm uppercase text-white">USEFUL PHRASES</h3></div>
+              <div class="bg-blue-700 px-4 py-2 rounded-xl mb-3"><h3 class="font-black text-sm uppercase text-white">USEFUL PHRASES</h3></div>
               <div class="space-y-2" id="container-phrases"></div>
             </div>
             <div>
@@ -172,23 +172,23 @@
         <button onclick="showBlockGrid()" class="text-xs font-bold text-slate-400 hover:text-white flex items-center gap-1">
           <i data-lucide="x" class="w-5 h-5"></i> Sair do Treino
         </button>
-        <span class="text-xs font-bold text-amber-400" id="quiz-progress-text">Questão 1/10</span>
+        <span class="text-xs font-bold text-blue-400" id="quiz-progress-text">Questão 1/10</span>
       </div>
 
       <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl text-center space-y-6">
         <div class="space-y-2">
           <span id="quiz-category-badge" class="text-[10px] font-bold uppercase tracking-wider bg-slate-800 px-3 py-1 rounded-full text-slate-400 border border-slate-700">VOCABULÁRIO</span>
-          <p class="text-xs text-emerald-400 font-bold" id="quiz-instruction">Como se diz em inglês?</p>
+          <p class="text-xs text-blue-400 font-bold" id="quiz-instruction">Como se diz em inglês?</p>
           <h2 id="quiz-question-title" class="text-2xl font-black text-white pt-1">Word</h2>
         </div>
 
-        <button id="quiz-audio-btn" onclick="playCurrentQuizAudio()" class="mx-auto w-16 h-16 rounded-2xl bg-sky-600/20 hover:bg-sky-600/40 border border-sky-500/30 flex items-center justify-center text-sky-400 transition transform active:scale-95 shadow-lg shadow-sky-600/10">
+        <button id="quiz-audio-btn" onclick="playCurrentQuizAudio()" class="mx-auto w-16 h-16 rounded-2xl bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 flex items-center justify-center text-blue-400 transition transform active:scale-95 shadow-lg shadow-blue-600/10">
           <i data-lucide="volume-2" class="w-8 h-8"></i>
         </button>
 
         <form id="quiz-write-form" onsubmit="submitWriteAnswer(event)" class="space-y-4 pt-2">
-          <input type="text" id="quiz-write-input" placeholder="Digite sua resposta..." autocomplete="off" class="w-full bg-slate-950 border-2 border-slate-700 focus:border-emerald-500 text-white font-bold text-center text-base rounded-2xl p-4 outline-none transition" />
-          <button type="submit" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm rounded-2xl transition shadow-lg shadow-emerald-600/20">Verificar Resposta</button>
+          <input type="text" id="quiz-write-input" placeholder="Digite sua resposta..." autocomplete="off" class="w-full bg-slate-950 border-2 border-slate-700 focus:border-blue-500 text-white font-bold text-center text-base rounded-2xl p-4 outline-none transition" />
+          <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black text-sm rounded-2xl transition shadow-lg shadow-blue-600/20">Verificar Resposta</button>
         </form>
 
         <button id="quiz-skip-audio-btn" onclick="skipAudioQuestion()" class="hidden w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2">
@@ -203,7 +203,7 @@
     <section id="view-quiz-results" class="hidden max-w-lg mx-auto space-y-6 py-6">
       <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl text-center space-y-6">
         <div class="space-y-2">
-          <div class="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center mx-auto">
+          <div class="w-16 h-16 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-full flex items-center justify-center mx-auto">
             <i data-lucide="trophy" class="w-8 h-8"></i>
           </div>
           <h2 class="text-2xl font-black text-white">Treino Concluído!</h2>
@@ -213,28 +213,28 @@
         <div class="grid grid-cols-3 gap-3 bg-slate-950 p-4 rounded-2xl border border-slate-800">
           <div>
             <p class="text-[10px] font-bold text-slate-500 uppercase">Precisão</p>
-            <p class="text-xl font-black text-emerald-400" id="res-accuracy">100%</p>
+            <p class="text-xl font-black text-blue-400" id="res-accuracy">100%</p>
           </div>
           <div class="border-x border-slate-800">
             <p class="text-[10px] font-bold text-slate-500 uppercase">Acertos</p>
-            <p class="text-xl font-black text-sky-400" id="res-correct">0</p>
+            <p class="text-xl font-black text-blue-400" id="res-correct">0</p>
           </div>
           <div>
             <p class="text-[10px] font-bold text-slate-500 uppercase">Erros</p>
-            <p class="text-xl font-black text-rose-400" id="res-wrong">0</p>
+            <p class="text-xl font-black text-blue-400" id="res-wrong">0</p>
           </div>
         </div>
 
         <div id="quiz-wrongs-wrapper" class="text-left space-y-3 pt-2 hidden">
           <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-            <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400"></i> Para Revisar:
+            <i data-lucide="alert-circle" class="w-4 h-4 text-blue-400"></i> Para Revisar:
           </h3>
           <div id="quiz-wrongs-list" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
         </div>
 
         <div class="flex gap-3 pt-2">
           <button onclick="showBlockGrid()" class="w-1/2 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl transition">Voltar ao Início</button>
-          <button onclick="openPracticeModal()" class="w-1/2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-emerald-600/20">Treinar Novamente</button>
+          <button onclick="openPracticeModal()" class="w-1/2 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-blue-600/20">Treinar Novamente</button>
         </div>
       </div>
     </section>
@@ -245,7 +245,7 @@
   <div id="modal-practice-select" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
-        <h3 class="font-bold text-lg text-white flex items-center gap-2"><i data-lucide="gamepad-2" class="w-5 h-5 text-emerald-500"></i> Iniciar Treino</h3>
+        <h3 class="font-bold text-lg text-white flex items-center gap-2"><i data-lucide="gamepad-2" class="w-5 h-5 text-blue-500"></i> Iniciar Treino</h3>
         <button onclick="closePracticeModal()" class="text-slate-500 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <div class="space-y-3">
@@ -257,7 +257,7 @@
           <label class="block text-xs font-bold text-slate-400 mb-1">Selecione a Lesson</label>
           <select id="practice-select-lesson" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white outline-none"></select>
         </div>
-        <button onclick="startPracticeSession()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-xl transition shadow-lg shadow-emerald-600/20">Começar Treino Completo</button>
+        <button onclick="startPracticeSession()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-xl transition shadow-lg shadow-blue-600/20">Começar Treino Completo</button>
       </div>
     </div>
   </div>
@@ -294,8 +294,8 @@
           <input type="text" id="input-en" placeholder="Ex: I drink coffee" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white" required />
         </div>
         <div>
-          <label class="block text-xs font-bold text-amber-400 mb-1">Pronúncia <span class="text-slate-500 font-normal">(Opcional)</span></label>
-          <input type="text" id="input-speech" placeholder="Ex: ái drínk có-fi" class="w-full bg-slate-800 border border-amber-500/40 rounded-xl p-3 text-sm text-white" />
+          <label class="block text-xs font-bold text-blue-400 mb-1">Pronúncia <span class="text-slate-500 font-normal">(Opcional)</span></label>
+          <input type="text" id="input-speech" placeholder="Ex: ái drínk có-fi" class="w-full bg-slate-800 border border-blue-500/40 rounded-xl p-3 text-sm text-white" />
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-400 mb-1">Em Português</label>
@@ -303,11 +303,82 @@
         </div>
         <div class="flex gap-2 pt-2">
           <button type="button" onclick="closeModal()" class="w-1/2 py-3 bg-slate-800 text-slate-300 font-bold text-sm rounded-xl">Cancelar</button>
-          <button type="submit" class="w-1/2 py-3 bg-red-600 hover:bg-red-500 text-white font-bold text-sm rounded-xl">Salvar Item</button>
+          <button type="submit" class="w-1/2 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-xl">Salvar Item</button>
         </div>
       </form>
     </div>
   </div>
+
+
+  <style id="premium-blue-black-theme">
+    :root {
+      --app-bg: #05070a;
+      --app-surface: #0b1118;
+      --app-surface-2: #101923;
+      --app-border: rgba(96, 165, 250, .14);
+      --app-border-strong: rgba(59, 130, 246, .35);
+      --app-blue: #3b82f6;
+      --app-blue-bright: #60a5fa;
+    }
+    html { background: var(--app-bg); }
+    body {
+      background:
+        radial-gradient(circle at 50% -10%, rgba(37,99,235,.13), transparent 34%),
+        linear-gradient(180deg, #05070a 0%, #070b10 48%, #05070a 100%);
+      letter-spacing: -0.01em;
+    }
+    header {
+      background: rgba(5, 9, 14, .82) !important;
+      border-color: var(--app-border) !important;
+      box-shadow: 0 12px 40px rgba(0,0,0,.25);
+    }
+    header > div { max-width: 1180px; }
+    main { max-width: 1180px !important; }
+    header .bg-blue-600, header .bg-gradient-to-br {
+      box-shadow: 0 0 28px rgba(37,99,235,.24) !important;
+    }
+    input, select, textarea {
+      transition: border-color .2s ease, box-shadow .2s ease, background .2s ease, transform .2s ease !important;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(59,130,246,.75) !important;
+      box-shadow: 0 0 0 3px rgba(59,130,246,.10), 0 0 24px rgba(37,99,235,.08);
+    }
+    button { transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease, color .18s ease !important; }
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0) scale(.98); }
+    main section, #history-container > div, #blocks-container > div, #search-results-container > div {
+      transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease, background-color .2s ease;
+    }
+    #blocks-container > div:hover, #search-results-container > div:hover {
+      transform: translateY(-3px);
+      border-color: rgba(59,130,246,.45) !important;
+      box-shadow: 0 14px 38px rgba(0,0,0,.25), 0 0 26px rgba(37,99,235,.07);
+    }
+    #history-container > div:hover { border-color: rgba(59,130,246,.30) !important; }
+    #view-quiz-game > div:first-child {
+      background: rgba(11,17,24,.92) !important;
+      border-color: var(--app-border) !important;
+    }
+    #quiz-progress-text { color: var(--app-blue-bright) !important; }
+    #quiz-audio-btn {
+      box-shadow: 0 0 28px rgba(37,99,235,.13) !important;
+    }
+    #quiz-audio-btn:hover { box-shadow: 0 0 34px rgba(37,99,235,.25) !important; }
+    #view-quiz-results > div {
+      box-shadow: 0 24px 70px rgba(0,0,0,.40), 0 0 50px rgba(37,99,235,.07) !important;
+    }
+    [id^="modal-"] > div {
+      box-shadow: 0 28px 80px rgba(0,0,0,.58), 0 0 40px rgba(37,99,235,.08) !important;
+      border-color: var(--app-border-strong) !important;
+    }
+    @media (max-width: 640px) {
+      main { padding-top: 1.25rem !important; padding-bottom: 2rem !important; }
+      header > div { height: auto; min-height: 64px; padding-top: .65rem; padding-bottom: .65rem; flex-wrap: wrap; }
+      header .flex-1 { order: 3; flex-basis: 100%; max-width: none; }
+      header .shrink-0:last-child { margin-left: auto; }
+    }
+  </style>
 
   <!-- SCRIPT FIREBASE E APLICAÇÃO -->
   <script type="module">
@@ -382,7 +453,7 @@
 
       const container = document.getElementById('search-results-container');
       container.innerHTML = matches.map(item => {
-        const speechFormatted = item.speech ? ` <span class="text-amber-400 font-medium">(${item.speech})</span>` : '';
+        const speechFormatted = item.speech ? ` <span class="text-blue-400 font-medium">(${item.speech})</span>` : '';
         return `
           <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col justify-between space-y-3 group">
             <div>
@@ -390,13 +461,13 @@
             </div>
             <div class="flex items-center justify-between text-[11px] border-t border-slate-800 pt-2">
               <div class="flex items-center gap-3">
-                <button onclick="speak('${item.en}')" class="text-sky-400 font-bold flex items-center gap-1 hover:underline"><i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Ouvir</button>
+                <button onclick="speak('${item.en}')" class="text-blue-400 font-bold flex items-center gap-1 hover:underline"><i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Ouvir</button>
                 <div class="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2 text-slate-500">
-                  <button onclick="editItem('${item.id}')" title="Editar" class="hover:text-amber-400"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                  <button onclick="deleteItem('${item.id}')" title="Excluir" class="hover:text-rose-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                  <button onclick="editItem('${item.id}')" title="Editar" class="hover:text-blue-400"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                  <button onclick="deleteItem('${item.id}')" title="Excluir" class="hover:text-blue-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                 </div>
               </div>
-              <button onclick="goToLocation(${item.block}, ${item.lesson})" class="text-red-400 font-bold">Bloco ${item.block} • L${item.lesson} →</button>
+              <button onclick="goToLocation(${item.block}, ${item.lesson})" class="text-blue-400 font-bold">Bloco ${item.block} • L${item.lesson} →</button>
             </div>
           </div>
         `;
@@ -431,7 +502,7 @@
       container.innerHTML = historyDB.slice(0, 5).map(h => `
         <div class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs">
           <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg ${h.accuracy >= 80 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'} flex items-center justify-center font-bold">
+            <div class="w-8 h-8 rounded-lg ${h.accuracy >= 80 ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-500/20 text-blue-400'} flex items-center justify-center font-bold">
               ${h.accuracy}%
             </div>
             <div>
@@ -477,18 +548,18 @@
         }
 
         return `
-          <div onclick="openBlock(${blockNum})" class="bg-slate-900 border border-slate-800 hover:border-red-500 p-5 rounded-2xl cursor-pointer transition space-y-4 group">
+          <div onclick="openBlock(${blockNum})" class="bg-slate-900 border border-slate-800 hover:border-blue-500 p-5 rounded-2xl cursor-pointer transition space-y-4 group">
             <div class="flex items-center justify-between">
-              <span class="text-[10px] font-bold uppercase text-red-400 bg-red-950/60 px-2 py-0.5 rounded border border-red-800/40">Módulo</span>
-              <span class="text-[10px] font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">${blockAccuracy}% Dominado</span>
+              <span class="text-[10px] font-bold uppercase text-blue-400 bg-blue-950/60 px-2 py-0.5 rounded border border-blue-800/40">Módulo</span>
+              <span class="text-[10px] font-bold text-blue-400 bg-blue-950/60 px-2 py-0.5 rounded border border-blue-800/40">${blockAccuracy}% Dominado</span>
             </div>
             <div>
-              <h3 class="text-xl font-black text-white group-hover:text-red-400">Bloco ${blockNum}</h3>
+              <h3 class="text-xl font-black text-white group-hover:text-blue-400">Bloco ${blockNum}</h3>
               <p class="text-xs text-slate-400 font-medium">${total} itens</p>
             </div>
             
             <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
-              <div class="bg-gradient-to-r from-red-500 to-emerald-500 h-1.5 rounded-full" style="width: ${blockAccuracy}%"></div>
+              <div class="bg-gradient-to-r from-blue-600 to-blue-400 h-1.5 rounded-full" style="width: ${blockAccuracy}%"></div>
             </div>
           </div>
         `;
@@ -523,7 +594,7 @@
       let lessons = [...new Set(db.filter(i => i.block === currentBlock).map(i => i.lesson))].sort((a,b) => a - b);
 
       container.innerHTML = lessons.map(l => `
-        <button onclick="selectLesson(${l})" class="px-3.5 py-1.5 rounded-xl font-black text-xs transition ${currentLesson === l ? 'bg-red-600 text-white shadow-lg' : 'bg-slate-800 text-slate-400'}">
+        <button onclick="selectLesson(${l})" class="px-3.5 py-1.5 rounded-xl font-black text-xs transition ${currentLesson === l ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-800 text-slate-400'}">
           Lesson ${l}
         </button>
       `).join('');
@@ -534,16 +605,16 @@
     function renderLessonContent() {
       const items = db.filter(i => i.block === currentBlock && i.lesson === currentLesson);
       const makeCard = (item) => {
-        const speechFormatted = item.speech ? ` <span class="text-amber-400 font-medium">(${item.speech})</span>` : '';
+        const speechFormatted = item.speech ? ` <span class="text-blue-400 font-medium">(${item.speech})</span>` : '';
         return `
           <div class="bg-slate-950 border border-slate-800 p-3.5 rounded-xl flex items-center justify-between group">
             <p class="font-bold text-white text-sm">${item.en} <span class="text-slate-500 font-normal">|</span> <span class="italic font-normal text-slate-300">${item.pt}</span>${speechFormatted}</p>
             <div class="flex items-center gap-1.5 shrink-0 ml-2">
               <div class="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 mr-1 text-slate-500">
-                <button onclick="editItem('${item.id}')" title="Editar" class="p-1 hover:text-amber-400"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                <button onclick="deleteItem('${item.id}')" title="Excluir" class="p-1 hover:text-rose-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                <button onclick="editItem('${item.id}')" title="Editar" class="p-1 hover:text-blue-400"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                <button onclick="deleteItem('${item.id}')" title="Excluir" class="p-1 hover:text-blue-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
               </div>
-              <button onclick="speak('${item.en}')" class="p-1.5 text-sky-400 hover:bg-slate-800 rounded-lg"><i data-lucide="volume-2" class="w-4 h-4"></i></button>
+              <button onclick="speak('${item.en}')" class="p-1.5 text-blue-400 hover:bg-slate-800 rounded-lg"><i data-lucide="volume-2" class="w-4 h-4"></i></button>
             </div>
           </div>
         `;
@@ -733,12 +804,12 @@
 
       if (userInput === expected) {
         quizCorrectCount++;
-        feedback.className = "p-4 rounded-2xl text-center font-bold bg-emerald-950/80 border border-emerald-500 text-emerald-200";
+        feedback.className = "p-4 rounded-2xl text-center font-bold bg-blue-950/80 border border-blue-500 text-blue-200";
         feedback.innerText = "✨ Perfeito! Excelente resposta!";
         speak(item.en);
       } else {
         quizWrongItems.push({ item, chosen: document.getElementById('quiz-write-input').value || '(em branco)', expected: expectedRaw });
-        feedback.className = "p-4 rounded-2xl text-center font-bold bg-rose-950/80 border border-rose-500 text-rose-200";
+        feedback.className = "p-4 rounded-2xl text-center font-bold bg-blue-950/80 border border-blue-500 text-rose-200";
         feedback.innerHTML = `❌ O correto é: <strong class="underline">${expectedRaw}</strong>`;
       }
 
@@ -792,9 +863,9 @@
           <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
             <div>
               <p class="font-bold text-white">${w.item.en}</p>
-              <p class="text-emerald-400 font-medium">Correto: ${w.expected}</p>
+              <p class="text-blue-400 font-medium">Correto: ${w.expected}</p>
             </div>
-            <span class="text-rose-400 line-through text-[11px]">Você: ${w.chosen}</span>
+            <span class="text-blue-400 line-through text-[11px]">Você: ${w.chosen}</span>
           </div>
         `).join('');
       } else {
