@@ -1203,9 +1203,20 @@ button{
           });
         }
 
-        closeModal();
-        await loadDataFromFirebase();
-        openBlock(block);
+	const previousLesson = lesson;
+
+	closeModal();
+	await loadDataFromFirebase();
+
+	currentBlock = block;
+	currentLesson = previousLesson;
+
+	document.getElementById('selected-block-title').innerText = `Bloco ${block}`;
+	document.getElementById('view-blocks-grid').classList.add('hidden');
+	document.getElementById('view-lesson-content').classList.remove('hidden');
+
+	renderLessonTabs();
+	renderLessonContent();
       } catch (error) {
         console.error("Erro ao salvar no Firebase: ", error);
         alert("Erro ao salvar os dados no banco.");
