@@ -31,7 +31,7 @@
         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-600 to-purple-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-red-500/20">W</div>
         <div class="hidden sm:block">
           <h1 class="font-bold text-lg leading-tight text-white">My Wizard Book</h1>
-          <p class="text-[10px] text-slate-400 font-medium">Sua biblioteca & treino diário</p>
+          <p class="text-[10px] text-slate-400 font-medium" id="stat-cloud-status">Conectando ao Firebase...</p>
         </div>
       </div>
 
@@ -309,15 +309,25 @@
     </div>
   </div>
 
-  <script>
-    const defaultItems = [
-      { id: '1', block: 1, lesson: 1, category: 'verbs', en: 'to eat', speech: 'tú ít', pt: 'comer' },
-      { id: '2', block: 1, lesson: 1, category: 'verbs', en: 'to drink', speech: 'tú drínk', pt: 'beber, tomar' },
-      { id: '3', block: 1, lesson: 1, category: 'phrases', en: 'I drink coffee with milk.', speech: 'ái drínk có-fi uíd mílk', pt: 'Eu bebo café com leite.' },
-      { id: '4', block: 1, lesson: 1, category: 'phrases', en: 'I eat bread and cheese.', speech: 'ái bréd énd tchís', pt: 'Eu como pão e queijo.' }
-    ];
+  <!-- SCRIPT FIREBASE E APLICAÇÃO -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    let db = JSON.parse(localStorage.getItem('wizard_app_v12')) || defaultItems;
+    const firebaseConfig = {
+      apiKey: "AIzaSyBD7dbcn_CVuUKVxVrvJKrI7UhkETLqKBM",
+      authDomain: "my-wizard-book.firebaseapp.com",
+      projectId: "my-wizard-book",
+      storageBucket: "my-wizard-book.firebasestorage.app",
+      messagingSenderId: "137982355787",
+      appId: "1:137982355787:web:cf8a308d5d2443d38a20ce"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const dbCloud = getFirestore(app);
+
+    // Variáveis globais do app
+    let db = [];
     let historyDB = JSON.parse(localStorage.getItem('wizard_app_history')) || [];
     
     let currentBlock = 1;
@@ -329,10 +339,26 @@
     let quizWrongItems = [];
     let currentPracticeBlock = 1;
 
-    function saveDB() { localStorage.setItem('wizard_app_v12', JSON.stringify(db)); }
+    async function loadDataFromFirebase() {
+      const statusText = document.getElementById('stat-cloud-status');
+      statusText.innerText = "Sincronizando com o Firebase...";
+      try {
+        const querySnapshot = await getDocs(collection(dbCloud, "wizard_items"));
+        db = [];
+        querySnapshot.forEach((documento) => {
+          db.push({ id: documento.id, ...documento.data() });
+        });
+        statusText.innerText = "Conectado ao Firebase";
+        renderBlocksGrid();
+      } catch (error) {
+        console.error("Erro ao carregar do Firestore: ", error);
+        statusText.innerText = "Erro ao conectar no banco";
+      }
+    }
+
     function saveHistory() { localStorage.setItem('wizard_app_history', JSON.stringify(historyDB)); }
 
-    function handleSearch(query) {
+    window.handleSearch = function(query) {
       const clearBtn = document.getElementById('clear-search-btn');
       const searchView = document.getElementById('view-search-results');
       const term = query.trim().toLowerCase();
@@ -351,7 +377,7 @@
       document.getElementById('view-quiz-game').classList.add('hidden');
       document.getElementById('view-quiz-results').classList.add('hidden');
 
-      const matches = db.filter(item => item.en.toLowerCase().includes(term) || item.pt.toLowerCase().includes(term) || (item.speech && item.speech.toLowerCase().includes(term)));
+      const matches = db.filter(item => (item.en && item.en.toLowerCase().includes(term)) || (item.pt && item.pt.toLowerCase().includes(term)) || (item.speech && item.speech.toLowerCase().includes(term)));
       document.getElementById('search-count-label').innerText = `${matches.length} resultados`;
 
       const container = document.getElementById('search-results-container');
@@ -378,8 +404,8 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    function clearSearch() { document.getElementById('global-search').value = ''; handleSearch(''); }
-    function goToLocation(b, l) { clearSearch(); currentBlock = b; currentLesson = l; openBlock(b); }
+    window.clearSearch = function() { document.getElementById('global-search').value = ''; handleSearch(''); }
+    window.goToLocation = function(b, l) { clearSearch(); currentBlock = b; currentLesson = l; openBlock(b); }
 
     function renderDashboardStats() {
       document.getElementById('stat-total-items').innerText = db.length;
@@ -418,7 +444,7 @@
       `).join('');
     }
 
-    function clearHistory() {
+    window.clearHistory = function() {
       if (confirm('Deseja realmente apagar o histórico de treinos?')) {
         historyDB = [];
         saveHistory();
@@ -434,6 +460,11 @@
 
       const container = document.getElementById('blocks-container');
       const blocks = [...new Set(db.map(i => i.block))].sort((a, b) => a - b);
+
+      if (blocks.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 col-span-full">Nenhum bloco cadastrado no Firebase.</p>`;
+        return;
+      }
 
       container.innerHTML = blocks.map(blockNum => {
         const total = db.filter(i => i.block === blockNum).length;
@@ -465,7 +496,7 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    function showBlockGrid() {
+    window.showBlockGrid = function() {
       clearSearch();
       document.getElementById('view-blocks-grid').classList.remove('hidden');
       document.getElementById('view-lesson-content').classList.add('hidden');
@@ -474,7 +505,7 @@
       renderBlocksGrid();
     }
 
-    function openBlock(blockId) {
+    window.openBlock = function(blockId) {
       currentBlock = blockId;
       const available = [...new Set(db.filter(i => i.block === blockId).map(i => i.lesson))].sort((a,b) => a - b);
       currentLesson = available.length > 0 ? available[0] : 1;
@@ -498,7 +529,7 @@
       `).join('');
     }
 
-    function selectLesson(l) { currentLesson = l; renderLessonTabs(); renderLessonContent(); }
+    window.selectLesson = function(l) { currentLesson = l; renderLessonTabs(); renderLessonContent(); }
 
     function renderLessonContent() {
       const items = db.filter(i => i.block === currentBlock && i.lesson === currentLesson);
@@ -525,7 +556,7 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    function editItem(id) {
+    window.editItem = function(id) {
       const item = db.find(i => i.id === id);
       if(!item) return;
       document.getElementById('input-edit-id').value = item.id;
@@ -539,20 +570,25 @@
       openModal();
     }
 
-    function deleteItem(id) {
-      if(confirm('Deseja realmente excluir este item?')) {
-        db = db.filter(i => i.id !== id);
-        saveDB();
-        const searchInput = document.getElementById('global-search').value;
-        if(searchInput.trim() !== '') {
-          handleSearch(searchInput);
-        } else {
-          openBlock(currentBlock);
+    window.deleteItem = async function(id) {
+      if(confirm('Deseja realmente excluir este item do Firebase?')) {
+        try {
+          await deleteDoc(doc(dbCloud, "wizard_items", id));
+          await loadDataFromFirebase();
+          const searchInput = document.getElementById('global-search').value;
+          if(searchInput.trim() !== '') {
+            handleSearch(searchInput);
+          } else {
+            openBlock(currentBlock);
+          }
+        } catch (error) {
+          console.error("Erro ao deletar documento: ", error);
+          alert("Erro ao excluir do Firebase.");
         }
       }
     }
 
-    function openPracticeModal() {
+    window.openPracticeModal = function() {
       const blocks = [...new Set(db.map(i => i.block))].sort((a,b) => a - b);
       if(blocks.length === 0) return alert('Cadastre ao menos um item!');
 
@@ -561,9 +597,9 @@
       document.getElementById('modal-practice-select').classList.remove('hidden');
     }
 
-    function closePracticeModal() { document.getElementById('modal-practice-select').classList.add('hidden'); }
+    window.closePracticeModal = function() { document.getElementById('modal-practice-select').classList.add('hidden'); }
 
-    function updatePracticeLessonsDropdown() {
+    window.updatePracticeLessonsDropdown = function() {
       const b = parseInt(document.getElementById('practice-select-block').value, 10);
       const lessons = [...new Set(db.filter(i => i.block === b).map(i => i.lesson))].sort((a,b) => a - b);
       document.getElementById('practice-select-lesson').innerHTML = `<option value="all">Todas as Lições</option>` + lessons.map(l => `<option value="${l}">Lesson ${l}</option>`).join('');
@@ -583,7 +619,7 @@
       return en;
     }
 
-    function startPracticeSession() {
+    window.startPracticeSession = function() {
       const block = parseInt(document.getElementById('practice-select-block').value, 10);
       const lessonVal = document.getElementById('practice-select-lesson').value;
 
@@ -668,7 +704,7 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    function playCurrentQuizAudio() {
+    window.playCurrentQuizAudio = function() {
       if(quizQueue[quizIndex]) speak(quizQueue[quizIndex].item.en);
     }
 
@@ -678,7 +714,7 @@
         .replace(/\s+/g, " ");
     }
 
-    function submitWriteAnswer(e) {
+    window.submitWriteAnswer = function(e) {
       e.preventDefault();
       if (isAnswering) return;
       isAnswering = true;
@@ -709,7 +745,7 @@
       setTimeout(nextQuestion, 2000);
     }
 
-    function skipAudioQuestion() {
+    window.skipAudioQuestion = function() {
       if (isAnswering) return;
       nextQuestion();
     }
@@ -768,7 +804,7 @@
       if (window.lucide) lucide.createIcons();
     }
 
-    function speak(text) {
+    window.speak = function(text) {
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(text);
@@ -777,14 +813,18 @@
       }
     }
 
-    function openModal() { 
+    window.openModal = function() { 
       document.getElementById('input-edit-id').value = '';
       document.getElementById('modal-title').innerText = 'Adicionar Novo Item';
       document.getElementById('modal-add').classList.remove('hidden'); 
     }
-    function closeModal() { document.getElementById('modal-add').classList.add('hidden'); document.getElementById('form-add').reset(); }
+    
+    window.closeModal = function() { 
+      document.getElementById('modal-add').classList.add('hidden'); 
+      document.getElementById('form-add').reset(); 
+    }
 
-    document.getElementById('form-add').addEventListener('submit', (e) => {
+    document.getElementById('form-add').addEventListener('submit', async (e) => {
       e.preventDefault();
       const id = document.getElementById('input-edit-id').value;
       const block = parseInt(document.getElementById('input-block').value, 10);
@@ -794,18 +834,29 @@
       const speech = document.getElementById('input-speech').value.trim();
       const pt = document.getElementById('input-pt').value.trim();
 
-      if (id) {
-        db = db.map(i => i.id === id ? { id, block, lesson, category, en, speech, pt } : i);
-      } else {
-        db.push({ id: Date.now().toString(), block, lesson, category, en, speech, pt });
-      }
+      try {
+        if (id) {
+          // Atualiza no Firebase
+          const docRef = doc(dbCloud, "wizard_items", id);
+          await updateDoc(docRef, { block, lesson, category, en, speech, pt });
+        } else {
+          // Adiciona novo no Firebase
+          await addDoc(collection(dbCloud, "wizard_items"), { block, lesson, category, en, speech, pt });
+        }
 
-      saveDB();
-      closeModal();
-      openBlock(block);
+        closeModal();
+        await loadDataFromFirebase();
+        openBlock(block);
+      } catch (error) {
+        console.error("Erro ao salvar no Firebase: ", error);
+        alert("Erro ao salvar os dados no banco.");
+      }
     });
 
-    document.addEventListener('DOMContentLoaded', () => { renderBlocksGrid(); });
+    // Iniciar dados do Firebase ao carregar a página
+    document.addEventListener('DOMContentLoaded', () => {
+      loadDataFromFirebase();
+    });
   </script>
 </body>
 </html>
