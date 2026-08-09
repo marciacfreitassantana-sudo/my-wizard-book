@@ -199,72 +199,39 @@ button{
 
 
 <style id="order-controls-style">
-  /* Reordenação discreta dos New Verbs */
-  .verb-sortable-card{
-    position:relative;
-    transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,opacity .18s ease;
+  .item-order-controls{
+    display:flex;
+    align-items:center;
+    gap:2px;
+    opacity:0;
+    transform:translateX(2px);
+    transition:opacity .18s ease,transform .18s ease;
   }
-  .verb-drag-handle{
-    width:24px;
-    height:28px;
-    flex:0 0 24px;
+  .group:hover .item-order-controls,
+  .item-order-controls:focus-within{
+    opacity:1;
+    transform:translateX(0);
+  }
+  .item-order-btn{
+    width:22px;
+    height:22px;
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    color:#475569;
     border-radius:7px;
-    cursor:grab;
-    touch-action:none;
-    user-select:none;
-    -webkit-user-select:none;
-    -webkit-touch-callout:none;
-    transition:color .18s ease,background .18s ease,opacity .18s ease;
+    color:#64748b;
+    transition:color .15s ease,background .15s ease;
   }
-  .verb-sortable-card:hover .verb-drag-handle,
-  .verb-drag-handle:focus-visible{
+  .item-order-btn:hover{
     color:#60a5fa;
-    background:rgba(59,130,246,.08);
+    background:rgba(59,130,246,.10);
   }
-  .verb-drag-handle:active{
-    cursor:grabbing;
-    color:#93c5fd;
-    background:rgba(59,130,246,.14);
-  }
-  .verb-sortable-card.verb-dragging{
-    opacity:.92;
-    transform:scale(1.012);
-    border-color:rgba(96,165,250,.42)!important;
-    box-shadow:0 18px 38px rgba(0,0,0,.34),0 0 0 1px rgba(59,130,246,.10);
-    z-index:20;
-  }
-  .verb-drag-placeholder{
-    min-height:58px;
-    border:1px dashed rgba(96,165,250,.42);
-    border-radius:.75rem;
-    background:rgba(59,130,246,.045);
-    position:relative;
-  }
-  .verb-drag-placeholder::after{
-    content:"";
-    position:absolute;
-    left:10px;
-    right:10px;
-    top:50%;
-    height:2px;
-    transform:translateY(-50%);
-    border-radius:999px;
-    background:rgba(96,165,250,.48);
-    box-shadow:0 0 12px rgba(59,130,246,.18);
-  }
-  .verb-drag-active #container-verbs{
-    user-select:none;
+  .item-order-btn:disabled{
+    opacity:.22;
+    cursor:not-allowed;
   }
   @media (max-width:768px){
-    .verb-drag-handle{
-      width:28px;
-      height:32px;
-      color:#64748b;
-    }
+    .item-order-controls{opacity:1;transform:none;}
   }
 </style>
 
@@ -840,7 +807,6 @@ button{
       return siblings;
     }
 
-    // Mantido para compatibilidade interna. A interface usa drag & drop no handle.
     window.moveItem = async function(id, direction) {
       const item = db.find(i => i.id === id);
       if (!item) return;
@@ -861,6 +827,8 @@ button{
           updateDoc(doc(dbCloud, "wizard_items", siblings[currentIndex].id), { order: siblings[currentIndex].order }),
           updateDoc(doc(dbCloud, "wizard_items", target.id), { order: target.order })
         ]);
+
+        // Atualiza somente a apresentação; nenhuma outra funcionalidade é alterada.
         renderLessonContent();
       } catch (error) {
         console.error("Erro ao mover item: ", error);
@@ -869,185 +837,29 @@ button{
       }
     }
 
-    let verbDragState = null;
-
-    function setupVerbDragAndDrop() {
-      const container = document.getElementById('container-verbs');
-      if (!container) return;
-
-      container.querySelectorAll('[data-drag-handle]').forEach(handle => {
-        handle.addEventListener('pointerdown', startVerbDrag);
-      });
-    }
-
-    function startVerbDrag(event) {
-      if (event.pointerType === 'mouse' && event.button !== 0) return;
-
-      const handle = event.currentTarget;
-      const card = handle.closest('.verb-sortable-card');
-      const container = document.getElementById('container-verbs');
-      if (!card || !container || verbDragState) return;
-
-      event.preventDefault();
-
-      const rect = card.getBoundingClientRect();
-      const placeholder = document.createElement('div');
-      placeholder.className = 'verb-drag-placeholder';
-      placeholder.setAttribute('aria-hidden', 'true');
-      placeholder.style.height = `${rect.height}px`;
-
-      card.after(placeholder);
-      card.classList.add('verb-dragging');
-      document.body.classList.add('verb-drag-active');
-
-      verbDragState = {
-        card,
-        container,
-        handle,
-        placeholder,
-        pointerId: event.pointerId,
-        offsetY: event.clientY - rect.top,
-        lastClientY: event.clientY
-      };
-
-      try {
-        handle.setPointerCapture(event.pointerId);
-      } catch (_) {}
-
-      handle.addEventListener('pointermove', handleVerbDrag);
-      handle.addEventListener('pointerup', finishVerbDrag);
-      handle.addEventListener('pointercancel', cancelVerbDrag);
-    }
-
-    function handleVerbDrag(event) {
-      if (!verbDragState || event.pointerId !== verbDragState.pointerId) return;
-
-      event.preventDefault();
-      verbDragState.lastClientY = event.clientY;
-
-      const { card, placeholder, container } = verbDragState;
-      const cards = [...container.querySelectorAll('.verb-sortable-card:not(.verb-dragging)')];
-
-      let inserted = false;
-      for (const otherCard of cards) {
-        const rect = otherCard.getBoundingClientRect();
-        const midpoint = rect.top + rect.height / 2;
-
-        if (event.clientY < midpoint) {
-          if (placeholder.nextElementSibling !== otherCard) {
-            otherCard.before(placeholder);
-          }
-          inserted = true;
-          break;
-        }
-      }
-
-      if (!inserted && placeholder.previousElementSibling !== card) {
-        container.appendChild(placeholder);
-      }
-    }
-
-    async function finishVerbDrag(event) {
-      if (!verbDragState || event.pointerId !== verbDragState.pointerId) return;
-
-      event.preventDefault();
-      const state = verbDragState;
-      cleanupVerbDragListeners();
-
-      const cardsInNewOrder = [...state.container.querySelectorAll('.verb-sortable-card')];
-      const draggedId = state.card.dataset.itemId;
-      const orderedIds = cardsInNewOrder.map(card => card.dataset.itemId);
-
-      state.placeholder.replaceWith(state.card);
-      state.card.classList.remove('verb-dragging');
-      document.body.classList.remove('verb-drag-active');
-      verbDragState = null;
-
-      const originalItem = db.find(item => item.id === draggedId);
-      if (!originalItem) {
-        renderLessonContent();
-        return;
-      }
-
-      const siblings = getOrderedSiblingItems(originalItem);
-      const byId = new Map(siblings.map(item => [item.id, item]));
-      const orderedItems = orderedIds.map(id => byId.get(id)).filter(Boolean);
-
-      if (orderedItems.length !== siblings.length) {
-        renderLessonContent();
-        return;
-      }
-
-      const updates = [];
-      orderedItems.forEach((item, index) => {
-        const newOrder = index + 1;
-        if (Number(item.order) !== newOrder) {
-          item.order = newOrder;
-          updates.push(
-            updateDoc(doc(dbCloud, "wizard_items", item.id), { order: newOrder })
-          );
-        }
-      });
-
-      try {
-        await Promise.all(updates);
-        renderLessonContent();
-      } catch (error) {
-        console.error("Erro ao salvar a nova ordem dos verbos: ", error);
-        alert("Não foi possível salvar a nova ordem dos verbos.");
-        await loadDataFromFirebase();
-      }
-    }
-
-    function cancelVerbDrag(event) {
-      if (!verbDragState || event.pointerId !== verbDragState.pointerId) return;
-
-      cleanupVerbDragListeners();
-      const state = verbDragState;
-      state.placeholder.replaceWith(state.card);
-      state.card.classList.remove('verb-dragging');
-      document.body.classList.remove('verb-drag-active');
-      verbDragState = null;
-      renderLessonContent();
-    }
-
-    function cleanupVerbDragListeners() {
-      if (!verbDragState) return;
-      const { handle } = verbDragState;
-      handle.removeEventListener('pointermove', handleVerbDrag);
-      handle.removeEventListener('pointerup', finishVerbDrag);
-      handle.removeEventListener('pointercancel', cancelVerbDrag);
-    }
-
     function renderLessonContent() {
       const items = db.filter(i => i.block === currentBlock && i.lesson === currentLesson);
 
-      const makeCard = (item) => {
+      const makeCard = (item, positionInfo) => {
         const speechFormatted = item.speech ? ` <span class="text-amber-400 font-medium">(${item.speech})</span>` : '';
-        const isVerb = item.category === 'verbs';
-        const dragHandle = isVerb ? `
-          <div
-            class="verb-drag-handle"
-            data-drag-handle
-            title="Arrastar para reorganizar"
-            aria-label="Arrastar para reorganizar"
-            role="button"
-            tabindex="0">
-            <i data-lucide="grip-vertical" class="w-4 h-4"></i>
-          </div>
-        ` : '';
+        const { index, total } = positionInfo;
 
         return `
-          <div
-            class="bg-slate-950 border border-slate-800 p-3.5 rounded-xl flex items-center justify-between group ${isVerb ? 'verb-sortable-card' : ''}"
-            ${isVerb ? `data-item-id="${item.id}" draggable="false"` : ''}>
-            <div class="flex items-center gap-2 min-w-0">
-              ${dragHandle}
-              <p class="font-bold text-white text-sm">${item.en} <span class="text-slate-500 font-normal">|</span> <span class="italic font-normal text-slate-300">${item.pt}</span>${speechFormatted}</p>
-            </div>
+          <div class="bg-slate-950 border border-slate-800 p-3.5 rounded-xl flex items-center justify-between group">
+            <p class="font-bold text-white text-sm">${item.en} <span class="text-slate-500 font-normal">|</span> <span class="italic font-normal text-slate-300">${item.pt}</span>${speechFormatted}</p>
 
             <div class="flex items-center gap-1.5 shrink-0 ml-2">
               <div class="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 mr-1 text-slate-500">
+                <div class="item-order-controls" title="Mover item">
+                  <button onclick="moveItem('${item.id}', -1)" title="Mover para cima" aria-label="Mover para cima"
+                    class="item-order-btn" ${index === 0 ? 'disabled' : ''}>
+                    <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button onclick="moveItem('${item.id}', 1)" title="Mover para baixo" aria-label="Mover para baixo"
+                    class="item-order-btn" ${index === total - 1 ? 'disabled' : ''}>
+                    <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
                 <button onclick="editItem('${item.id}')" title="Editar" class="p-1 hover:text-amber-400">
                   <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                 </button>
@@ -1076,7 +888,7 @@ button{
           });
 
         return categoryItems.length
-          ? categoryItems.map(item => makeCard(item)).join('')
+          ? categoryItems.map((item, index) => makeCard(item, { index, total: categoryItems.length })).join('')
           : `<p class="text-xs text-slate-500">${emptyText}</p>`;
       };
 
@@ -1086,7 +898,6 @@ button{
       document.getElementById('container-grammar').innerHTML = renderCategory('grammar', 'Nenhuma gramática.');
 
       if (window.lucide) lucide.createIcons();
-      setupVerbDragAndDrop();
     }
 
     window.editItem = function(id) {
