@@ -197,6 +197,44 @@ button{
 }
 </style>
 
+
+<style id="order-controls-style">
+  .item-order-controls{
+    display:flex;
+    align-items:center;
+    gap:2px;
+    opacity:0;
+    transform:translateX(2px);
+    transition:opacity .18s ease,transform .18s ease;
+  }
+  .group:hover .item-order-controls,
+  .item-order-controls:focus-within{
+    opacity:1;
+    transform:translateX(0);
+  }
+  .item-order-btn{
+    width:22px;
+    height:22px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:7px;
+    color:#64748b;
+    transition:color .15s ease,background .15s ease;
+  }
+  .item-order-btn:hover{
+    color:#60a5fa;
+    background:rgba(59,130,246,.10);
+  }
+  .item-order-btn:disabled{
+    opacity:.22;
+    cursor:not-allowed;
+  }
+  @media (max-width:768px){
+    .item-order-controls{opacity:1;transform:none;}
+  }
+</style>
+
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased">
 
@@ -524,6 +562,31 @@ button{
         querySnapshot.forEach((documento) => {
           db.push({ id: documento.id, ...documento.data() });
         });
+
+        // Compatibilidade com itens antigos: itens que ainda não possuem
+        // order/createdAt recebem uma ordem temporária baseada na sequência
+        // em que foram carregados. Novos itens passam a usar createdAt + order.
+        const groups = {};
+        db.forEach(item => {
+          const key = `${item.block}|${item.lesson}|${item.category}`;
+          if (!groups[key]) groups[key] = [];
+          groups[key].push(item);
+        });
+        Object.values(groups).forEach(group => {
+          group.sort((a, b) => {
+            const ao = Number.isFinite(Number(a.order)) ? Number(a.order) : Number.MAX_SAFE_INTEGER;
+            const bo = Number.isFinite(Number(b.order)) ? Number(b.order) : Number.MAX_SAFE_INTEGER;
+            if (ao !== bo) return ao - bo;
+            const ac = Number.isFinite(Number(a.createdAt)) ? Number(a.createdAt) : Number.MAX_SAFE_INTEGER;
+            const bc = Number.isFinite(Number(b.createdAt)) ? Number(b.createdAt) : Number.MAX_SAFE_INTEGER;
+            if (ac !== bc) return ac - bc;
+            return 0;
+          });
+          group.forEach((item, index) => {
+            if (!Number.isFinite(Number(item.order))) item.order = index + 1;
+          });
+        });
+
         statusText.innerText = "Conectado ao Firebase";
         renderBlocksGrid();
       } catch (error) {
@@ -553,7 +616,16 @@ button{
       document.getElementById('view-quiz-game').classList.add('hidden');
       document.getElementById('view-quiz-results').classList.add('hidden');
 
-      const matches = db.filter(item => (item.en && item.en.toLowerCase().includes(term)) || (item.pt && item.pt.toLowerCase().includes(term)) || (item.speech && item.speech.toLowerCase().includes(term)));
+      const matches = db
+        .filter(item => (item.en && item.en.toLowerCase().includes(term)) || (item.pt && item.pt.toLowerCase().includes(term)) || (item.speech && item.speech.toLowerCase().includes(term)))
+        .sort((a, b) => {
+          const ao = Number.isFinite(Number(a.order)) ? Number(a.order) : Number.MAX_SAFE_INTEGER;
+          const bo = Number.isFinite(Number(b.order)) ? Number(b.order) : Number.MAX_SAFE_INTEGER;
+          if (a.block !== b.block) return a.block - b.block;
+          if (a.lesson !== b.lesson) return a.lesson - b.lesson;
+          if (a.category !== b.category) return String(a.category).localeCompare(String(b.category));
+          return ao - bo;
+        });
       document.getElementById('search-count-label').innerText = `${matches.length} resultados`;
 
       const container = document.getElementById('search-results-container');
@@ -707,28 +779,124 @@ button{
 
     window.selectLesson = function(l) { currentLesson = l; renderLessonTabs(); renderLessonContent(); }
 
+
+    // Retorna os itens da mesma categoria, bloco e lesson na ordem definida pelo usuário.
+    function getOrderedSiblingItems(item) {
+      return db
+        .filter(i =>
+          i.block === item.block &&
+          i.lesson === item.lesson &&
+          i.category === item.category
+        )
+        .sort((a, b) => {
+          const ao = Number.isFinite(Number(a.order)) ? Number(a.order) : Number.MAX_SAFE_INTEGER;
+          const bo = Number.isFinite(Number(b.order)) ? Number(b.order) : Number.MAX_SAFE_INTEGER;
+          if (ao !== bo) return ao - bo;
+          const ac = Number.isFinite(Number(a.createdAt)) ? Number(a.createdAt) : Number.MAX_SAFE_INTEGER;
+          const bc = Number.isFinite(Number(b.createdAt)) ? Number(b.createdAt) : Number.MAX_SAFE_INTEGER;
+          if (ac !== bc) return ac - bc;
+          return String(a.id).localeCompare(String(b.id));
+        });
+    }
+
+    function ensureOrderForSiblings(item) {
+      const siblings = getOrderedSiblingItems(item);
+      siblings.forEach((sibling, index) => {
+        sibling.order = index + 1;
+      });
+      return siblings;
+    }
+
+    window.moveItem = async function(id, direction) {
+      const item = db.find(i => i.id === id);
+      if (!item) return;
+
+      const siblings = ensureOrderForSiblings(item);
+      const currentIndex = siblings.findIndex(i => i.id === id);
+      const targetIndex = currentIndex + direction;
+
+      if (currentIndex < 0 || targetIndex < 0 || targetIndex >= siblings.length) return;
+
+      const target = siblings[targetIndex];
+      const currentOrder = siblings[currentIndex].order;
+      siblings[currentIndex].order = target.order;
+      target.order = currentOrder;
+
+      try {
+        await Promise.all([
+          updateDoc(doc(dbCloud, "wizard_items", siblings[currentIndex].id), { order: siblings[currentIndex].order }),
+          updateDoc(doc(dbCloud, "wizard_items", target.id), { order: target.order })
+        ]);
+
+        // Atualiza somente a apresentação; nenhuma outra funcionalidade é alterada.
+        renderLessonContent();
+      } catch (error) {
+        console.error("Erro ao mover item: ", error);
+        alert("Não foi possível alterar a ordem deste item.");
+        await loadDataFromFirebase();
+      }
+    }
+
     function renderLessonContent() {
       const items = db.filter(i => i.block === currentBlock && i.lesson === currentLesson);
-      const makeCard = (item) => {
-        const speechFormatted = item.speech ? ` <span class="text-amber-300 font-medium">(${item.speech})</span>` : '';
+
+      const makeCard = (item, positionInfo) => {
+        const speechFormatted = item.speech ? ` <span class="text-amber-400 font-medium">(${item.speech})</span>` : '';
+        const { index, total } = positionInfo;
+
         return `
           <div class="bg-slate-950 border border-slate-800 p-3.5 rounded-xl flex items-center justify-between group">
             <p class="font-bold text-white text-sm">${item.en} <span class="text-slate-500 font-normal">|</span> <span class="italic font-normal text-slate-300">${item.pt}</span>${speechFormatted}</p>
+
             <div class="flex items-center gap-1.5 shrink-0 ml-2">
               <div class="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 mr-1 text-slate-500">
-                <button onclick="editItem('${item.id}')" title="Editar" class="p-1 hover:text-amber-300"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                <button onclick="deleteItem('${item.id}')" title="Excluir" class="p-1 hover:text-slate-300"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                <div class="item-order-controls" title="Mover item">
+                  <button onclick="moveItem('${item.id}', -1)" title="Mover para cima" aria-label="Mover para cima"
+                    class="item-order-btn" ${index === 0 ? 'disabled' : ''}>
+                    <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button onclick="moveItem('${item.id}', 1)" title="Mover para baixo" aria-label="Mover para baixo"
+                    class="item-order-btn" ${index === total - 1 ? 'disabled' : ''}>
+                    <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+                <button onclick="editItem('${item.id}')" title="Editar" class="p-1 hover:text-amber-400">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="deleteItem('${item.id}')" title="Excluir" class="p-1 hover:text-rose-400">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
               </div>
-              <button onclick="speak('${item.en}')" class="p-1.5 text-blue-300 hover:bg-slate-800 rounded-lg"><i data-lucide="volume-2" class="w-4 h-4"></i></button>
+              <button onclick="speak('${item.en}')" class="p-1.5 text-sky-400 hover:bg-slate-800 rounded-lg" title="Ouvir">
+                <i data-lucide="volume-2" class="w-4 h-4"></i>
+              </button>
             </div>
           </div>
         `;
       };
 
-      document.getElementById('container-verbs').innerHTML = items.filter(i => i.category === 'verbs').map(makeCard).join('') || `<p class="text-xs text-slate-500">Nenhum verbo.</p>`;
-      document.getElementById('container-words').innerHTML = items.filter(i => i.category === 'words').map(makeCard).join('') || `<p class="text-xs text-slate-500">Nenhuma palavra.</p>`;
-      document.getElementById('container-phrases').innerHTML = items.filter(i => i.category === 'phrases').map(makeCard).join('') || `<p class="text-xs text-slate-500">Nenhuma frase.</p>`;
-      document.getElementById('container-grammar').innerHTML = items.filter(i => i.category === 'grammar').map(makeCard).join('') || `<p class="text-xs text-slate-500">Nenhuma gramática.</p>`;
+      const renderCategory = (category, emptyText) => {
+        const categoryItems = items
+          .filter(i => i.category === category)
+          .sort((a, b) => {
+            const ao = Number.isFinite(Number(a.order)) ? Number(a.order) : Number.MAX_SAFE_INTEGER;
+            const bo = Number.isFinite(Number(b.order)) ? Number(b.order) : Number.MAX_SAFE_INTEGER;
+            if (ao !== bo) return ao - bo;
+            const ac = Number.isFinite(Number(a.createdAt)) ? Number(a.createdAt) : Number.MAX_SAFE_INTEGER;
+            const bc = Number.isFinite(Number(b.createdAt)) ? Number(b.createdAt) : Number.MAX_SAFE_INTEGER;
+            return ac - bc;
+          });
+
+        return categoryItems.length
+          ? categoryItems.map((item, index) => makeCard(item, { index, total: categoryItems.length })).join('')
+          : `<p class="text-xs text-slate-500">${emptyText}</p>`;
+      };
+
+      document.getElementById('container-verbs').innerHTML = renderCategory('verbs', 'Nenhum verbo.');
+      document.getElementById('container-words').innerHTML = renderCategory('words', 'Nenhuma palavra.');
+      document.getElementById('container-phrases').innerHTML = renderCategory('phrases', 'Nenhuma frase.');
+      document.getElementById('container-grammar').innerHTML = renderCategory('grammar', 'Nenhuma gramática.');
+
       if (window.lucide) lucide.createIcons();
     }
 
@@ -1016,8 +1184,23 @@ button{
           const docRef = doc(dbCloud, "wizard_items", id);
           await updateDoc(docRef, { block, lesson, category, en, speech, pt });
         } else {
-          // Adiciona novo no Firebase
-          await addDoc(collection(dbCloud, "wizard_items"), { block, lesson, category, en, speech, pt });
+          // Adiciona novo no Firebase.
+          // createdAt mantém a ordem natural de criação; order permite reorganização manual.
+          const siblingItems = db.filter(i =>
+            i.block === block &&
+            i.lesson === lesson &&
+            i.category === category
+          );
+          const maxOrder = siblingItems.reduce((max, item) => {
+            const value = Number(item.order);
+            return Number.isFinite(value) ? Math.max(max, value) : max;
+          }, 0);
+
+          await addDoc(collection(dbCloud, "wizard_items"), {
+            block, lesson, category, en, speech, pt,
+            createdAt: Date.now(),
+            order: maxOrder + 1
+          });
         }
 
         closeModal();
