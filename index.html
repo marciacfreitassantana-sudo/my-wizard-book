@@ -284,14 +284,158 @@ button{
   }
 </style>
 
+
+<style id="theme-mode-style">
+/* =========================================================
+   MY WIZARD BOOK — LIGHT / DARK MODE
+   Theme preference is device-local; study data remains in Firebase.
+   ========================================================= */
+:root{
+  --mw-page-bg:#070a0f;
+  --mw-page-text:#f1f5f9;
+  --mw-header-bg:rgba(15,23,42,.92);
+  --mw-surface-light:#ffffff;
+  --mw-surface-light-2:#f8fafc;
+  --mw-border-light:#e2e8f0;
+  --mw-text-light:#0f172a;
+  --mw-muted-light:#64748b;
+}
+
+body.theme-light{
+  --mw-page-bg:#f5f7fb;
+  --mw-page-text:#0f172a;
+  --mw-header-bg:rgba(255,255,255,.92);
+  background:
+    radial-gradient(circle at 12% -12%,rgba(59,130,246,.10),transparent 30%),
+    radial-gradient(circle at 88% 0%,rgba(139,92,246,.08),transparent 26%),
+    #f5f7fb !important;
+  color:var(--mw-text-light) !important;
+}
+
+body.theme-light header{
+  background:var(--mw-header-bg)!important;
+  border-bottom-color:#e2e8f0!important;
+  box-shadow:0 8px 30px rgba(15,23,42,.07)!important;
+}
+
+body.theme-light main,
+body.theme-light footer{
+  color:var(--mw-text-light);
+}
+
+body.theme-light .bg-slate-950{background:#f8fafc!important;}
+body.theme-light .bg-slate-900{background:#ffffff!important;}
+body.theme-light .bg-slate-800{background:#f1f5f9!important;}
+body.theme-light .bg-slate-700{background:#e2e8f0!important;}
+body.theme-light .border-slate-800{border-color:#e2e8f0!important;}
+body.theme-light .border-slate-700{border-color:#cbd5e1!important;}
+body.theme-light .border-slate-600{border-color:#cbd5e1!important;}
+body.theme-light .text-white{color:#0f172a!important;}
+body.theme-light .text-slate-100{color:#1e293b!important;}
+body.theme-light .text-slate-200{color:#334155!important;}
+body.theme-light .text-slate-300{color:#475569!important;}
+body.theme-light .text-slate-400{color:#64748b!important;}
+body.theme-light .text-slate-500{color:#64748b!important;}
+body.theme-light .text-slate-600{color:#475569!important;}
+body.theme-light .text-slate-700{color:#334155!important;}
+body.theme-light input,
+body.theme-light select,
+body.theme-light textarea{
+  background:#ffffff!important;
+  color:#0f172a!important;
+  border-color:#cbd5e1!important;
+}
+body.theme-light input::placeholder,
+body.theme-light textarea::placeholder{color:#94a3b8!important;}
+body.theme-light input:focus,
+body.theme-light select:focus,
+body.theme-light textarea:focus{
+  border-color:rgba(59,130,246,.62)!important;
+  box-shadow:0 0 0 4px rgba(59,130,246,.09),0 0 20px rgba(59,130,246,.05)!important;
+}
+body.theme-light .shadow-lg,
+body.theme-light .shadow-xl{box-shadow:0 10px 30px rgba(15,23,42,.08)!important;}
+body.theme-light .hover\:bg-slate-800:hover{background:#e2e8f0!important;}
+body.theme-light .hover\:bg-slate-700:hover{background:#cbd5e1!important;}
+body.theme-light .hover\:text-white:hover{color:#0f172a!important;}
+body.theme-light .hover\:text-slate-200:hover{color:#1e293b!important;}
+
+/* Surfaces created by the app with rgba colors */
+body.theme-light [class*="bg-slate-900/"]{background:rgba(255,255,255,.92)!important;}
+body.theme-light [class*="bg-slate-950/"]{background:rgba(248,250,252,.94)!important;}
+body.theme-light [class*="bg-slate-800/"]{background:rgba(241,245,249,.92)!important;}
+
+.theme-toggle{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(148,163,184,.18);
+  background:rgba(15,23,42,.65);
+  color:#cbd5e1;
+  transition:all .2s ease;
+  flex-shrink:0;
+}
+.theme-toggle:hover{
+  transform:translateY(-1px);
+  border-color:rgba(96,165,250,.45);
+  color:#fff;
+  background:rgba(30,41,59,.82);
+}
+body.theme-light .theme-toggle{
+  background:#f8fafc;
+  color:#475569;
+  border-color:#e2e8f0;
+}
+body.theme-light .theme-toggle:hover{
+  background:#eef2ff;
+  color:#1d4ed8;
+  border-color:#bfdbfe;
+}
+.theme-toggle svg{width:18px;height:18px;}
+.theme-toggle .theme-icon-light{display:none;}
+body.theme-light .theme-toggle .theme-icon-dark{display:none;}
+body.theme-light .theme-toggle .theme-icon-light{display:block;}
+
+@media (max-width:640px){
+  .theme-toggle{width:36px;height:36px;border-radius:11px;}
+}
+</style>
+
+
+<style id="enhancements-style">
+.search-result-type{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;}
+.toast-stack{position:fixed;right:18px;bottom:18px;z-index:100;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.mw-toast{min-width:250px;max-width:360px;padding:12px 14px;border-radius:14px;border:1px solid rgba(148,163,184,.16);background:rgba(15,23,42,.96);color:#f8fafc;box-shadow:0 18px 50px rgba(0,0,0,.35);display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;animation:mwToastIn .22s ease both;}
+.mw-toast.success{border-color:rgba(45,212,191,.28)} .mw-toast.error{border-color:rgba(248,113,113,.28)}
+@keyframes mwToastIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.confirm-card{width:min(440px,100%);padding:24px;border-radius:24px;background:linear-gradient(145deg,#111a28,#0b1018);border:1px solid rgba(96,165,250,.18);box-shadow:0 30px 90px rgba(0,0,0,.6);}
+body.theme-light .confirm-card{background:#fff;border-color:#e2e8f0;box-shadow:0 25px 70px rgba(15,23,42,.18);}
+.modal-large{max-width:560px!important;padding:28px!important;} .modal-large form{gap:16px!important;} .modal-large input,.modal-large select,.modal-large textarea{padding:14px!important;min-height:46px;}
+.auth-overlay{position:fixed;inset:0;z-index:200;background:radial-gradient(circle at 50% 0%,rgba(59,130,246,.13),transparent 35%),#070a0f;display:flex;align-items:center;justify-content:center;padding:20px;}
+.auth-card{width:min(430px,100%);border:1px solid rgba(96,165,250,.18);background:linear-gradient(145deg,#111a28,#0a0f17);border-radius:28px;padding:30px;box-shadow:0 35px 100px rgba(0,0,0,.6);}
+body.theme-light .auth-overlay{background:#f8fafc;} body.theme-light .auth-card{background:#fff;border-color:#e2e8f0;box-shadow:0 25px 70px rgba(15,23,42,.15);} body.theme-light .auth-card h2{color:#0f172a!important;} body.theme-light .confirm-card h3{color:#0f172a!important;}
+.auth-card input{width:100%;padding:13px 14px;border-radius:12px;border:1px solid rgba(148,163,184,.18);background:rgba(7,12,18,.82);color:white;outline:none;} body.theme-light .auth-card input{background:#fff;color:#0f172a;border-color:#cbd5e1;}
+.auth-user{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+@media(max-width:640px){.toast-stack{left:14px;right:14px;bottom:14px}.mw-toast{min-width:0;width:100%;}.modal-large{padding:22px!important;}}
+</style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased">
+<script>
+(function(){
+  try {
+    const savedTheme = localStorage.getItem('wizard_theme');
+    if (savedTheme === 'light') document.body.classList.add('theme-light');
+  } catch (e) {}
+})();
+</script>
 
   <!-- HEADER -->
   <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40">
     <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
       <div class="flex items-center gap-3 cursor-pointer shrink-0" onclick="showBlockGrid()">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-blue-500/20">W</div>
         <div class="hidden sm:block">
           <h1 class="font-bold text-lg leading-tight text-white">My Wizard Book</h1>
           <p class="text-[10px] text-slate-400 font-medium" id="stat-cloud-status">Conectando ao Firebase...</p>
@@ -309,6 +453,11 @@ button{
 
       <!-- AÇÕES -->
       <div class="flex items-center gap-2 shrink-0">
+        <button id="theme-toggle" class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Ativar modo escuro" title="Ativar modo escuro">
+          <i data-lucide="moon" class="theme-icon-dark"></i>
+          <i data-lucide="sun" class="theme-icon-light"></i>
+        </button>
+        <button id="auth-user-btn" onclick="handleAuthButton()" class="hidden px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-bold transition flex items-center gap-1.5" title="Conta"><i data-lucide="user-circle" class="w-4 h-4"></i><span id="auth-user-label" class="auth-user"></span></button>
         <button onclick="openPracticeModal()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-lg shadow-blue-600/20 flex items-center gap-1.5">
           <i data-lucide="gamepad-2" class="w-4 h-4"></i> Praticar
         </button>
@@ -555,7 +704,7 @@ button{
   <!-- MODAIS -->
   <!-- Modal de Prática -->
   <div id="modal-practice-select" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
+    <div class="bg-slate-900 border border-slate-800 p-7 rounded-3xl max-w-xl w-full space-y-5 shadow-2xl modal-large">
       <div class="flex items-center justify-between">
         <h3 class="font-bold text-lg text-white flex items-center gap-2"><i data-lucide="gamepad-2" class="w-5 h-5 text-blue-400"></i> Iniciar Treino</h3>
         <button onclick="closePracticeModal()" class="text-slate-500 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -576,7 +725,7 @@ button{
 
   <!-- Modal de Adicionar Item (simplificado) -->
   <div id="modal-add" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
+    <div class="bg-slate-900 border border-slate-800 p-7 rounded-3xl max-w-xl w-full space-y-5 shadow-2xl modal-large">
       <div class="flex items-center justify-between">
         <h3 class="font-bold text-lg text-white" id="modal-title">Adicionar Novo Item</h3>
         <button onclick="closeModal()" class="text-slate-500 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -608,7 +757,7 @@ button{
 
   <!-- Modal de Adicionar Bloco -->
   <div id="modal-add-block" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
+    <div class="bg-slate-900 border border-slate-800 p-7 rounded-3xl max-w-xl w-full space-y-5 shadow-2xl modal-large">
       <div class="flex items-center justify-between">
         <h3 class="font-bold text-lg text-white flex items-center gap-2"><i data-lucide="book-open" class="w-5 h-5 text-blue-400"></i> Adicionar Bloco</h3>
         <button onclick="closeAddBlockModal()" class="text-slate-500 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -632,7 +781,7 @@ button{
 
   <!-- Modal de Adicionar Lesson -->
   <div id="modal-add-lesson" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
+    <div class="bg-slate-900 border border-slate-800 p-7 rounded-3xl max-w-xl w-full space-y-5 shadow-2xl modal-large">
       <div class="flex items-center justify-between">
         <h3 class="font-bold text-lg text-white flex items-center gap-2"><i data-lucide="layers" class="w-5 h-5 text-indigo-400"></i> Adicionar Lesson</h3>
         <button onclick="closeAddLessonModal()" class="text-slate-500 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -656,7 +805,7 @@ button{
 
   <!-- Modal de Adicionar New Word Avulsa -->
   <div id="modal-add-avulsa" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
+    <div class="bg-slate-900 border border-slate-800 p-7 rounded-3xl max-w-xl w-full space-y-5 shadow-2xl modal-large">
       <div class="flex items-center justify-between">
         <h3 class="font-bold text-lg text-white flex items-center gap-2"><i data-lucide="file-text" class="w-5 h-5 text-amber-400"></i> Adicionar New Word Avulsa</h3>
         <button onclick="closeAddAvulsaModal()" class="text-slate-500 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -683,10 +832,21 @@ button{
     </div>
   </div>
 
+  <div id="auth-overlay" class="auth-overlay hidden">
+    <div class="auth-card">
+      <div class="flex items-start justify-between gap-4 mb-6"><div><p class="text-[10px] font-black uppercase tracking-[.18em] text-blue-400 mb-2">My Wizard Book</p><h2 id="auth-title" class="text-2xl font-black text-white">Entrar</h2><p id="auth-subtitle" class="text-xs text-slate-400 mt-1">Acesse seu aplicativo em qualquer dispositivo.</p></div><div class="w-11 h-11 rounded-2xl bg-blue-500/10 text-blue-300 flex items-center justify-center"><i data-lucide="cloud" class="w-5 h-5"></i></div></div>
+      <form id="auth-form" class="space-y-3"><div><label class="block text-xs font-bold text-slate-400 mb-1.5">E-mail</label><input id="auth-email" type="email" autocomplete="email" placeholder="seu@email.com" required /></div><div><label class="block text-xs font-bold text-slate-400 mb-1.5">Senha</label><input id="auth-password" type="password" autocomplete="current-password" placeholder="••••••••" minlength="6" required /></div><button id="auth-submit" type="submit" class="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-sm transition">Entrar</button></form>
+      <button id="auth-toggle" type="button" onclick="toggleAuthMode()" class="w-full mt-3 py-2.5 text-xs font-bold text-slate-400 hover:text-blue-300 transition">Criar uma conta</button><p id="auth-error" class="hidden mt-4 text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl p-3"></p>
+    </div>
+  </div>
+  <div id="confirm-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[210] flex items-center justify-center p-4"><div class="confirm-card"><div class="flex items-start gap-4"><div class="w-11 h-11 rounded-2xl bg-rose-500/10 text-rose-300 flex items-center justify-center shrink-0"><i data-lucide="trash-2" class="w-5 h-5"></i></div><div class="min-w-0"><h3 id="confirm-title" class="text-lg font-black text-white">Confirmar</h3><p id="confirm-message" class="text-xs leading-5 text-slate-400 mt-1"></p></div></div><div class="flex gap-2 mt-6"><button id="confirm-cancel" type="button" class="w-1/2 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm transition">Cancelar</button><button id="confirm-ok" type="button" class="w-1/2 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm transition">Excluir</button></div></div></div>
+  <div id="toast-stack" class="toast-stack"></div>
+
   <!-- SCRIPT FIREBASE E APLICAÇÃO -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, runTransaction, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBD7dbcn_CVuUKVxVrvJKrI7UhkETLqKBM",
@@ -699,6 +859,9 @@ button{
 
     const app = initializeApp(firebaseConfig);
     const dbCloud = getFirestore(app);
+    const auth = getAuth(app);
+    let currentUser = null;
+    let appInitialized = false;
 
     // Variáveis globais do app
     let db = [];
@@ -1002,62 +1165,28 @@ button{
     }
 
     window.handleSearch = function(query) {
-      const clearBtn = document.getElementById('clear-search-btn');
-      const searchView = document.getElementById('view-search-results');
-      const term = query.trim().toLowerCase();
-
-      if (term === '') {
-        clearBtn.classList.add('hidden');
-        searchView.classList.add('hidden');
-        document.getElementById('view-blocks-grid').classList.remove('hidden');
-        return;
-      }
-
-      clearBtn.classList.remove('hidden');
-      searchView.classList.remove('hidden');
-      document.getElementById('view-blocks-grid').classList.add('hidden');
-      document.getElementById('view-lesson-content').classList.add('hidden');
-      document.getElementById('view-quiz-game').classList.add('hidden');
-      document.getElementById('view-quiz-results').classList.add('hidden');
-
-      const matches = db
-        .filter(item => (item.en && item.en.toLowerCase().includes(term)) || (item.pt && item.pt.toLowerCase().includes(term)) || (item.speech && item.speech.toLowerCase().includes(term)))
-        .sort((a, b) => {
-          const ao = Number.isFinite(Number(a.order)) ? Number(a.order) : Number.MAX_SAFE_INTEGER;
-          const bo = Number.isFinite(Number(b.order)) ? Number(b.order) : Number.MAX_SAFE_INTEGER;
-          if (a.block !== b.block) return a.block - b.block;
-          if (a.lesson !== b.lesson) return a.lesson - b.lesson;
-          if (a.category !== b.category) return String(a.category).localeCompare(String(b.category));
-          return ao - bo;
-        });
-      document.getElementById('search-count-label').innerText = `${matches.length} resultados`;
-
-      const container = document.getElementById('search-results-container');
-      container.innerHTML = matches.map(item => {
-        const speechFormatted = item.speech ? ` <span class="text-amber-300 font-medium">(${item.speech})</span>` : '';
-        return `
-          <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col justify-between space-y-3 group">
-            <div>
-              <p class="font-bold text-white text-base">${item.en} <span class="text-slate-500 font-normal">|</span> <span class="italic font-normal text-slate-300">${item.pt}</span>${speechFormatted}</p>
-            </div>
-            <div class="flex items-center justify-between text-[11px] border-t border-slate-800 pt-2">
-              <div class="flex items-center gap-3">
-                <button onclick="speak('${item.en}')" class="text-blue-300 font-bold flex items-center gap-1 hover:underline"><i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Ouvir</button>
-                <div class="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2 text-slate-500">
-                  <button onclick="editItem('${item.id}')" title="Editar" class="hover:text-amber-300"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                  <button onclick="deleteItem('${item.id}')" title="Excluir" class="hover:text-slate-300"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-                </div>
-              </div>
-              <button onclick="goToLocation(${item.block}, ${item.lesson})" class="text-red-400 font-bold">Bloco ${item.block} • L${item.lesson} →</button>
-            </div>
-          </div>
-        `;
-      }).join('');
-      if (window.lucide) lucide.createIcons();
+      const clearBtn=document.getElementById('clear-search-btn'), searchView=document.getElementById('view-search-results'), term=query.trim().toLowerCase();
+      if(term===''){clearBtn.classList.add('hidden');searchView.classList.add('hidden');document.getElementById('view-blocks-grid').classList.remove('hidden');return;}
+      clearBtn.classList.remove('hidden');searchView.classList.remove('hidden');
+      ['view-blocks-grid','view-lesson-content','view-quiz-game','view-quiz-results'].forEach(id=>document.getElementById(id).classList.add('hidden')); searchView.classList.remove('hidden');
+      const matches=[];
+      db.forEach(i=>{if([i.en,i.pt,i.speech].filter(Boolean).join(' ').toLowerCase().includes(term))matches.push({...i,searchType:'Item'});});
+      avulsas.forEach(i=>{if([i.en,i.pt,i.speech].filter(Boolean).join(' ').toLowerCase().includes(term))matches.push({...i,searchType:'New Word Avulsa'});});
+      blocks.forEach(b=>{if([b.en,b.pt].filter(Boolean).join(' ').toLowerCase().includes(term))matches.push({...b,searchType:'Bloco',searchEntity:'block'});});
+      lessons.forEach(l=>{const b=blocks.find(x=>x.id===l.blockId);if([l.en,b?.en,b?.pt].filter(Boolean).join(' ').toLowerCase().includes(term))matches.push({...l,searchType:'Lesson',searchEntity:'lesson'});});
+      matches.sort((a,b)=>String(a.searchType).localeCompare(String(b.searchType))||String(a.en||'').localeCompare(String(b.en||'')));
+      document.getElementById('search-count-label').innerText=`${matches.length} resultados`; const container=document.getElementById('search-results-container');
+      if(!matches.length){container.innerHTML='<div class="col-span-full py-12 text-center"><div class="w-12 h-12 mx-auto rounded-2xl bg-blue-500/10 text-blue-300 flex items-center justify-center mb-3"><i data-lucide="search-x" class="w-5 h-5"></i></div><p class="font-bold text-white">Nenhum resultado encontrado</p><p class="text-xs text-slate-500 mt-1">Tente buscar por outra palavra, lesson ou bloco.</p></div>';}else{container.innerHTML=matches.map(i=>{
+        if(i.searchEntity==='block')return `<div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3"><span class="search-result-type">Bloco</span><p class="font-black text-white text-base">${i.en}</p><p class="text-xs italic text-slate-400">${i.pt||''}</p><button onclick="openBlock(${i.id})" class="text-blue-300 font-bold text-xs">Abrir bloco →</button></div>`;
+        if(i.searchEntity==='lesson')return `<div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3"><span class="search-result-type">Lesson</span><p class="font-black text-white text-base">${i.en}</p><p class="text-xs text-slate-500">${blocks.find(b=>b.id===i.blockId)?.en||'Bloco'}</p><button onclick="goToLocation(${i.blockId},${i.id})" class="text-blue-300 font-bold text-xs">Abrir lesson →</button></div>`;
+        const esc=String(i.en||'').replace(/'/g,"\'"); const edit=i.searchType==='New Word Avulsa'?`editAvulsa('${i.id}')`:`editItem('${i.id}')`; const del=i.searchType==='New Word Avulsa'?`deleteAvulsa('${i.id}')`:`deleteItem('${i.id}')`; const loc=i.searchType==='New Word Avulsa'?'New Word Avulsa':`Bloco ${i.block} • L${i.lesson}`; const speech=i.speech?` <span class="text-amber-300 font-medium">(${i.speech})</span>`:'';
+        return `<div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col justify-between space-y-3 group"><div><span class="search-result-type">${i.searchType}</span><p class="font-bold text-white text-base mt-1">${i.en} <span class="text-slate-500 font-normal">|</span> <span class="italic font-normal text-slate-300">${i.pt||''}</span>${speech}</p></div><div class="flex items-center justify-between text-[11px] border-t border-slate-800 pt-2"><div class="flex items-center gap-3"><button onclick="speak('${esc}')" class="text-blue-300 font-bold flex items-center gap-1 hover:underline"><i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Ouvir</button><div class="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2 text-slate-500"><button onclick="${edit}" title="Editar" class="hover:text-amber-300"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button><button onclick="${del}" title="Excluir" class="hover:text-rose-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></div>${i.searchType==='New Word Avulsa'?`<span class="text-slate-500 font-bold">${loc}</span>`:`<button onclick="goToLocation(${i.block},${i.lesson})" class="text-blue-300 font-bold">${loc} →</button>`}</div></div>`;
+      }).join('');}
+      if(window.lucide)lucide.createIcons();
     }
 
     window.clearSearch = function() { document.getElementById('global-search').value = ''; handleSearch(''); }
-    window.goToLocation = function(b, l) { clearSearch(); currentBlock = b; currentLesson = l; openBlock(b); }
+    window.goToLocation = function(b, l) { clearSearch(); openBlock(b, l); }
 
     function renderDashboardStats() {
       document.getElementById('stat-total-items').innerText = db.length + avulsas.length;
@@ -1096,8 +1225,11 @@ button{
       `).join('');
     }
 
+    function showToast(message,type='success'){const stack=document.getElementById('toast-stack'),toast=document.createElement('div');toast.className=`mw-toast ${type}`;toast.innerHTML=`<i data-lucide="${type==='error'?'alert-circle':'check-circle-2'}" class="w-4 h-4 ${type==='error'?'text-rose-300':'text-teal-300'}"></i><span>${message}</span>`;stack.appendChild(toast);if(window.lucide)lucide.createIcons();setTimeout(()=>{toast.style.opacity='0';toast.style.transform='translateY(8px)';toast.style.transition='.2s ease';setTimeout(()=>toast.remove(),220)},2800);}
+    function showConfirm(message,title='Confirmar exclusão'){return new Promise(resolve=>{const modal=document.getElementById('confirm-modal');document.getElementById('confirm-title').innerText=title;document.getElementById('confirm-message').innerText=message;modal.classList.remove('hidden');if(window.lucide)lucide.createIcons();const finish=v=>{modal.classList.add('hidden');resolve(v)};document.getElementById('confirm-cancel').onclick=()=>finish(false);document.getElementById('confirm-ok').onclick=()=>finish(true);});}
+
     window.clearHistory = async function() {
-      if (!confirm('Deseja realmente apagar o histórico de treinos?')) return;
+      if (!(await showConfirm('O histórico de treinos será removido do Firebase. Esta ação não pode ser desfeita.','Apagar histórico?'))) return;
       try {
         await deleteHistoryEntries();
         historyDB = [];
@@ -1171,7 +1303,7 @@ button{
       renderBlocksGrid();
     }
 
-    window.openBlock = function(blockId) {
+    window.openBlock = function(blockId, requestedLessonId = null) {
       currentBlock = blockId;
       const block = blocks.find(b => b.id === blockId);
       const blockLessons = lessons.filter(l => l.blockId === blockId);
@@ -1180,9 +1312,10 @@ button{
       document.getElementById('selected-block-subtitle').innerText = block ? block.pt : '';
       
       if (blockLessons.length > 0) {
-        currentLesson = blockLessons[0].id;
+        const requested = blockLessons.find(l => l.id === requestedLessonId);
+        currentLesson = requested ? requested.id : blockLessons[0].id;
       } else {
-        currentLesson = 1;
+        currentLesson = null;
       }
       
       document.getElementById('view-blocks-grid').classList.add('hidden');
@@ -1207,6 +1340,7 @@ button{
             <span onclick="event.stopPropagation(); editLesson(${l.id})" class="lesson-edit-btn p-0.5 rounded-md text-slate-500 hover:text-amber-300 transition cursor-pointer" title="Editar Lesson">
               <i data-lucide="pencil" class="w-2.5 h-2.5"></i>
             </span>
+            <span onclick="event.stopPropagation(); deleteLesson(${l.id})" class="lesson-edit-btn p-0.5 rounded-md text-slate-500 hover:text-rose-400 transition cursor-pointer" title="Excluir Lesson"><i data-lucide="trash-2" class="w-2.5 h-2.5"></i></span>
           </button>
         `).join('');
       }
@@ -1403,16 +1537,13 @@ button{
     }
 
     window.deleteItem = async function(id) {
-      if(confirm('Deseja realmente excluir este item do Firebase?')) {
+      if(await showConfirm('Este item será removido permanentemente do Firebase.','Excluir item?')) {
         try {
           await deleteDoc(doc(dbCloud, "wizard_items", id));
           await loadDataFromFirebase();
-          const searchInput = document.getElementById('global-search').value;
-          if(searchInput.trim() !== '') {
-            handleSearch(searchInput);
-          } else {
-            openBlock(currentBlock);
-          }
+          const searchInput=document.getElementById('global-search').value;
+          if(searchInput.trim()!==''){handleSearch(searchInput);}else if(!document.getElementById('view-lesson-content').classList.contains('hidden')){const block=blocks.find(b=>b.id===currentBlock);document.getElementById('selected-block-title').innerText=block?.en||`Bloco ${currentBlock}`;document.getElementById('selected-block-subtitle').innerText=block?.pt||'';renderLessonTabs();renderLessonContent();}
+          showToast('Item excluído com sucesso.');
         } catch (error) {
           console.error("Erro ao deletar documento: ", error);
           alert("Erro ao excluir do Firebase.");
@@ -1441,7 +1572,7 @@ button{
 
     window.deleteBlock = async function(blockId) {
       const block = blocks.find(b => b.id === blockId);
-      if (!confirm(`Deseja realmente excluir o bloco "${block?.en || blockId}" e todas as suas lessons?`)) return;
+      if (!(await showConfirm(`O bloco "${block?.en || blockId}" e todas as suas lessons e itens serão removidos do Firebase.`,'Excluir bloco?'))) return;
 
       try {
         const lessonsToDelete = lessons.filter(l => l.blockId === blockId);
@@ -1454,7 +1585,8 @@ button{
         ]);
 
         await loadCloudCollections();
-        renderAllCloudData();
+        if(document.getElementById('view-lesson-content').classList.contains('hidden')){renderBlocksGrid();}else{const rest=blocks.filter(b=>b.id!==blockId);if(rest.length)openBlock(rest[0].id);else showBlockGrid();}
+        showToast('Bloco excluído com sucesso.');
       } catch (error) {
         console.error('Erro ao excluir bloco:', error);
         alert('Erro ao excluir o bloco do Firebase.');
@@ -1481,6 +1613,13 @@ button{
       document.getElementById('modal-add-lesson').classList.remove('hidden');
     }
 
+    window.deleteLesson = async function(lessonId){
+      const lesson=lessons.find(l=>l.id===lessonId); if(!lesson)return;
+      const count=db.filter(i=>i.lesson===lessonId).length;
+      if(!(await showConfirm(`A lesson "${lesson.en}" será excluída do Firebase${count?` junto com ${count} item(ns) vinculados`:''}.`,'Excluir lesson?')))return;
+      try{const items=db.filter(i=>i.lesson===lessonId);await Promise.all([deleteDoc(doc(dbCloud,CLOUD_COLLECTIONS.lessons,`lesson_${lessonId}`)),...items.map(i=>deleteDoc(doc(dbCloud,CLOUD_COLLECTIONS.items,i.id)))]);await loadCloudCollections();currentBlock=lesson.blockId;const rest=lessons.filter(l=>l.blockId===currentBlock);currentLesson=rest.length?rest[0].id:null;document.getElementById('view-blocks-grid').classList.add('hidden');document.getElementById('view-lesson-content').classList.remove('hidden');const block=blocks.find(b=>b.id===currentBlock);document.getElementById('selected-block-title').innerText=block?.en||`Bloco ${currentBlock}`;document.getElementById('selected-block-subtitle').innerText=block?.pt||'';renderLessonTabs();renderLessonContent();showToast('Lesson excluída com sucesso.');}catch(error){console.error(error);showToast('Não foi possível excluir a lesson.','error');}
+    }
+
     // Avulsa management functions
     window.openAddAvulsaModal = function() {
       document.getElementById('form-add-avulsa').reset();
@@ -1503,11 +1642,12 @@ button{
     }
 
     window.deleteAvulsa = async function(id) {
-      if (!confirm('Deseja realmente excluir esta palavra avulsa?')) return;
+      if (!(await showConfirm('Esta New Word Avulsa será removida permanentemente do Firebase.','Excluir palavra?'))) return;
       try {
         await deleteDoc(doc(dbCloud, CLOUD_COLLECTIONS.avulsas, `avulsa_${id}`));
         await loadCloudCollections();
         renderLessonContent();
+        showToast('Palavra excluída com sucesso.');
       } catch (error) {
         console.error('Erro ao excluir palavra avulsa:', error);
         alert('Erro ao excluir a palavra avulsa do Firebase.');
@@ -1640,6 +1780,7 @@ button{
 
         renderLessonTabs();
         renderLessonContent();
+        showToast(id ? 'Alteração salva.' : 'Item adicionado.');
       } catch (error) {
         console.error("Erro ao salvar no Firebase: ", error);
         alert("Erro ao salvar os dados no banco.");
@@ -1667,6 +1808,7 @@ button{
         closeAddBlockModal();
         await loadCloudCollections();
         renderBlocksGrid();
+        showToast(editId ? 'Bloco atualizado.' : 'Bloco adicionado.');
       } catch (error) {
         console.error('Erro ao salvar bloco no Firebase:', error);
         alert('Erro ao salvar o bloco no Firebase.');
@@ -1705,9 +1847,22 @@ button{
         }
 
         closeAddLessonModal();
+        const wasOnLessonPage = !document.getElementById('view-lesson-content').classList.contains('hidden');
+        const pageBlock = currentBlock;
+        const pageLesson = currentLesson;
         await loadCloudCollections();
-        renderLessonTabs();
-        renderLessonContent();
+        if (wasOnLessonPage) {
+          currentBlock = pageBlock;
+          currentLesson = pageLesson;
+          const currentBlockData = blocks.find(b => b.id === currentBlock);
+          document.getElementById('selected-block-title').innerText = currentBlockData?.en || `Bloco ${currentBlock}`;
+          document.getElementById('selected-block-subtitle').innerText = currentBlockData?.pt || '';
+          renderLessonTabs();
+          renderLessonContent();
+        } else {
+          renderBlocksGrid();
+        }
+        showToast(editId ? 'Lesson atualizada.' : 'Lesson adicionada.');
       } catch (error) {
         console.error('Erro ao salvar lesson no Firebase:', error);
         alert('Erro ao salvar a lesson no Firebase.');
@@ -1735,11 +1890,19 @@ button{
         closeAddAvulsaModal();
         await loadCloudCollections();
         renderLessonContent();
+        showToast(id ? 'Palavra atualizada.' : 'Palavra adicionada.');
       } catch (error) {
         console.error('Erro ao salvar palavra avulsa no Firebase:', error);
         alert('Erro ao salvar a palavra avulsa no Firebase.');
       }
     });
+
+    let authMode='login';
+    window.toggleAuthMode=function(){authMode=authMode==='login'?'register':'login';document.getElementById('auth-title').innerText=authMode==='login'?'Entrar':'Criar conta';document.getElementById('auth-subtitle').innerText=authMode==='login'?'Acesse seu aplicativo em qualquer dispositivo.':'Crie sua conta para manter seus dados protegidos.';document.getElementById('auth-submit').innerText=authMode==='login'?'Entrar':'Criar conta';document.getElementById('auth-toggle').innerText=authMode==='login'?'Criar uma conta':'Já tenho uma conta';document.getElementById('auth-error').classList.add('hidden');};
+    window.handleAuthButton=async function(){if(!currentUser)return;const ok=await showConfirm('Você será desconectada deste dispositivo. Seus dados continuam no Firebase.','Sair da conta?');if(ok)await signOut(auth);};
+    function setAuthError(m){const e=document.getElementById('auth-error');e.innerText=m;e.classList.remove('hidden');}
+    document.getElementById('auth-form').addEventListener('submit',async e=>{e.preventDefault();const email=document.getElementById('auth-email').value.trim(),password=document.getElementById('auth-password').value,button=document.getElementById('auth-submit');button.disabled=true;button.innerText=authMode==='login'?'Entrando...':'Criando...';document.getElementById('auth-error').classList.add('hidden');try{if(authMode==='login')await signInWithEmailAndPassword(auth,email,password);else await createUserWithEmailAndPassword(auth,email,password);}catch(error){const m={'auth/invalid-credential':'E-mail ou senha incorretos.','auth/email-already-in-use':'Este e-mail já possui uma conta.','auth/weak-password':'A senha precisa ter pelo menos 6 caracteres.','auth/invalid-email':'Digite um e-mail válido.'};setAuthError(m[error.code]||'Não foi possível concluir o acesso. Verifique sua conexão e tente novamente.');}finally{button.disabled=false;button.innerText=authMode==='login'?'Entrar':'Criar conta';}});
+    function updateAuthUI(user){const overlay=document.getElementById('auth-overlay'),btn=document.getElementById('auth-user-btn');if(user){overlay.classList.add('hidden');btn.classList.remove('hidden');document.getElementById('auth-user-label').innerText=user.email||'Conta';document.getElementById('stat-cloud-status').innerText='Sincronizado com o Firebase';}else{overlay.classList.remove('hidden');btn.classList.add('hidden');document.getElementById('stat-cloud-status').innerText='Faça login para sincronizar';}if(window.lucide)lucide.createIcons();}
 
     // Quiz functions
     function transformSentence(en, targetType) {
@@ -1969,9 +2132,33 @@ button{
     }
 
     // Iniciar dados do Firebase ao carregar a página
-    document.addEventListener('DOMContentLoaded', () => {
-      loadDataFromFirebase();
-    });
+    document.addEventListener('DOMContentLoaded',()=>{onAuthStateChanged(auth,async user=>{currentUser=user;updateAuthUI(user);if(user&&!appInitialized){appInitialized=true;await loadDataFromFirebase();}else if(!user){appInitialized=false;realtimeUnsubscribers.forEach(fn=>fn&&fn());realtimeUnsubscribers=[];}});});
   </script>
+
+<script>
+function updateThemeToggle() {
+  const button = document.getElementById('theme-toggle');
+  if (!button) return;
+  const isLight = document.body.classList.contains('theme-light');
+  button.setAttribute('aria-label', isLight ? 'Ativar modo escuro' : 'Ativar modo claro');
+  button.setAttribute('title', isLight ? 'Ativar modo escuro' : 'Ativar modo claro');
+}
+
+function applyTheme(theme) {
+  const isLight = theme === 'light';
+  document.body.classList.toggle('theme-light', isLight);
+  try { localStorage.setItem('wizard_theme', isLight ? 'light' : 'dark'); } catch (e) {}
+  updateThemeToggle();
+  if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+}
+
+function toggleTheme() {
+  const isLight = document.body.classList.contains('theme-light');
+  applyTheme(isLight ? 'dark' : 'light');
+}
+
+document.addEventListener('DOMContentLoaded', updateThemeToggle);
+</script>
+
 </body>
 </html>
