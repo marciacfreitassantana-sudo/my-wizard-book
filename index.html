@@ -1431,9 +1431,14 @@ body.theme-light .confirm-card{background:#fff;border-color:#e2e8f0;box-shadow:0
           : `<p class="text-xs text-slate-500">${emptyText}</p>`;
       };
 
-      // Render avulsas
+      // Render avulsas somente da Lesson atual.
+      // Cada New Word Avulsa pertence ao contexto em que foi criada.
       const renderAvulsas = () => {
-        const sortedAvulsas = [...avulsas].sort((a, b) => a.order - b.order);
+        const lessonAvulsas = avulsas.filter(item =>
+          normalizeNumber(item.blockId, -1) === normalizeNumber(currentBlock, -2) &&
+          normalizeNumber(item.lessonId, -1) === normalizeNumber(currentLesson, -2)
+        );
+        const sortedAvulsas = [...lessonAvulsas].sort((a, b) => normalizeNumber(a.order) - normalizeNumber(b.order));
         return sortedAvulsas.length
           ? sortedAvulsas.map((item, index) => {
               const speechFormatted = item.speech ? ` <span class="text-amber-400 font-medium">(${item.speech})</span>` : '';
@@ -1837,12 +1842,26 @@ body.theme-light .confirm-card{background:#fff;border-color:#e2e8f0;box-shadow:0
 
       try {
         if (id) {
-          await updateDoc(doc(dbCloud, CLOUD_COLLECTIONS.avulsas, `avulsa_${id}`), { en, pt, speech });
+          // A edição preserva a Lesson à qual a palavra já pertence.
+          const existing = avulsas.find(a => String(a.id) === String(id));
+          await updateDoc(doc(dbCloud, CLOUD_COLLECTIONS.avulsas, `avulsa_${id}`), {
+            en, pt, speech,
+            blockId: normalizeNumber(existing?.blockId, currentBlock),
+            lessonId: normalizeNumber(existing?.lessonId, currentLesson)
+          });
         } else {
           const newId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-          const maxOrder = avulsas.reduce((max, a) => Math.max(max, normalizeNumber(a.order)), 0);
+          const lessonItems = avulsas.filter(a =>
+            normalizeNumber(a.blockId, -1) === normalizeNumber(currentBlock, -2) &&
+            normalizeNumber(a.lessonId, -1) === normalizeNumber(currentLesson, -2)
+          );
+          const maxOrder = lessonItems.reduce((max, a) => Math.max(max, normalizeNumber(a.order)), 0);
           await setDoc(doc(dbCloud, CLOUD_COLLECTIONS.avulsas, `avulsa_${newId}`), {
-            id: newId, en, pt, speech, order: maxOrder + 1, createdAt: Date.now()
+            id: newId, en, pt, speech,
+            blockId: normalizeNumber(currentBlock),
+            lessonId: normalizeNumber(currentLesson),
+            order: maxOrder + 1,
+            createdAt: Date.now()
           });
         }
 
