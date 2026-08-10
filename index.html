@@ -118,7 +118,6 @@ section.grid > div,
 #container-verbs > div,
 #container-words > div,
 #container-phrases > div,
-#container-grammar > div,
 #container-real-life > div,
 #container-avulsas > div,
 #search-results-container > div{
@@ -127,7 +126,6 @@ section.grid > div,
 #container-verbs > div:hover,
 #container-words > div:hover,
 #container-phrases > div:hover,
-#container-grammar > div:hover,
 #container-real-life > div:hover,
 #container-avulsas > div:hover,
 #search-results-container > div:hover{
@@ -226,6 +224,26 @@ button{
   width: 14px;
   height: 14px;
 }
+
+/* Lesson tab edit button - mais harmonioso */
+.lesson-tab {
+  position: relative;
+  transition: all 0.2s ease;
+}
+.lesson-tab .lesson-edit-btn {
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.2s ease;
+  margin-left: 4px;
+}
+.lesson-tab:hover .lesson-edit-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+.lesson-tab .lesson-edit-btn:hover {
+  color: var(--mw-gold-light);
+  background: rgba(251,191,36,0.12);
+}
 </style>
 
 
@@ -293,9 +311,6 @@ button{
       <div class="flex items-center gap-2 shrink-0">
         <button onclick="openPracticeModal()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-lg shadow-blue-600/20 flex items-center gap-1.5">
           <i data-lucide="gamepad-2" class="w-4 h-4"></i> Praticar
-        </button>
-        <button onclick="openModal()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-lg shadow-blue-600/20 flex items-center gap-1.5">
-          <i data-lucide="plus" class="w-4 h-4"></i> Cadastrar
         </button>
       </div>
     </div>
@@ -559,7 +574,7 @@ button{
     </div>
   </div>
 
-  <!-- Modal de Adicionar Item -->
+  <!-- Modal de Adicionar Item (simplificado) -->
   <div id="modal-add" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
@@ -568,24 +583,9 @@ button{
       </div>
       <form id="form-add" class="space-y-3">
         <input type="hidden" id="input-edit-id" value="" />
-        <div>
-          <label class="block text-xs font-bold text-slate-400 mb-1">Bloco</label>
-          <select id="input-block" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white outline-none"></select>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-400 mb-1">Lesson</label>
-          <select id="input-lesson" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white outline-none"></select>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-400 mb-1">Categoria</label>
-          <select id="input-category" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white">
-            <option value="verbs">Verbs</option>
-            <option value="words">New Words</option>
-            <option value="phrases">Useful Phrases</option>
-            <option value="real_life">Real Life</option>
-            <option value="grammar">Grammar</option>
-          </select>
-        </div>
+        <input type="hidden" id="input-block" value="" />
+        <input type="hidden" id="input-lesson" value="" />
+        <input type="hidden" id="input-category" value="" />
         <div>
           <label class="block text-xs font-bold text-slate-400 mb-1">Em Inglês</label>
           <input type="text" id="input-en" placeholder="Ex: I drink coffee" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white" required />
@@ -645,10 +645,6 @@ button{
         <div>
           <label class="block text-xs font-bold text-slate-400 mb-1">Nome da Lesson em Inglês</label>
           <input type="text" id="input-lesson-en" placeholder="Ex: At Home" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white" required />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-400 mb-1">Nome da Lesson em Português</label>
-          <input type="text" id="input-lesson-pt" placeholder="Ex: Em Casa" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white" required />
         </div>
         <div class="flex gap-2 pt-2">
           <button type="button" onclick="closeAddLessonModal()" class="w-1/2 py-3 bg-slate-800 text-slate-300 font-bold text-sm rounded-xl">Cancelar</button>
@@ -737,8 +733,8 @@ button{
       } else {
         // Initialize with default lessons
         lessons = [
-          { id: 1, blockId: 1, en: 'Lesson 1', pt: 'Lição 1' },
-          { id: 2, blockId: 1, en: 'Lesson 2', pt: 'Lição 2' }
+          { id: 1, blockId: 1, en: 'Lesson 1' },
+          { id: 2, blockId: 1, en: 'Lesson 2' }
         ];
         saveBlocksAndLessons();
       }
@@ -773,9 +769,6 @@ button{
         querySnapshot.forEach((documento) => {
           db.push({ id: documento.id, ...documento.data() });
         });
-
-        // Migrate old grammar items that might have category 'grammar' but need separation
-        // We'll keep them in 'grammar' and 'real_life' will be separate
 
         // Compatibilidade com itens antigos: itens que ainda não possuem
         // order/createdAt recebem uma ordem temporária baseada na sequência
@@ -945,8 +938,15 @@ button{
         return `
           <div onclick="openBlock(${block.id})" class="bg-slate-900 border border-slate-800 hover:border-blue-500 p-5 rounded-2xl cursor-pointer transition space-y-4 group relative">
             <div class="flex items-center justify-between">
-              <span class="text-[10px] font-bold uppercase text-red-400 bg-red-950/60 px-2 py-0.5 rounded border border-red-800/40">Módulo</span>
               <span class="text-[10px] font-bold text-teal-300 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">${blockAccuracy}% Dominado</span>
+              <div class="flex gap-1">
+                <button onclick="event.stopPropagation(); editBlock(${block.id})" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-500 hover:text-amber-300 transition" title="Editar Bloco">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="event.stopPropagation(); deleteBlock(${block.id})" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-500 hover:text-rose-400 transition" title="Excluir Bloco">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
             </div>
             <div>
               <h3 class="text-xl font-black text-white group-hover:text-blue-300">${block.en}</h3>
@@ -956,15 +956,6 @@ button{
             
             <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
               <div class="bg-gradient-to-r from-blue-500 via-indigo-500 to-teal-400 h-1.5 rounded-full" style="width: ${blockAccuracy}%"></div>
-            </div>
-
-            <div class="absolute top-3 right-3 flex gap-1">
-              <button onclick="event.stopPropagation(); editBlock(${block.id})" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-500 hover:text-amber-300 transition" title="Editar Bloco">
-                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-              </button>
-              <button onclick="event.stopPropagation(); deleteBlock(${block.id})" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-500 hover:text-rose-400 transition" title="Excluir Bloco">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              </button>
             </div>
           </div>
         `;
@@ -1006,20 +997,17 @@ button{
       const container = document.getElementById('lesson-tabs');
       const blockLessons = lessons.filter(l => l.blockId === currentBlock);
       
-      // Check if there are lessons, if not show add button
       let html = '';
       
       if (blockLessons.length === 0) {
         html = `<span class="text-xs text-slate-400">Nenhuma lesson ainda.</span>`;
       } else {
         html = blockLessons.map(l => `
-          <button onclick="selectLesson(${l.id})" class="px-3.5 py-1.5 rounded-xl font-black text-xs transition ${currentLesson === l.id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'} group relative">
+          <button onclick="selectLesson(${l.id})" class="lesson-tab px-3.5 py-1.5 rounded-xl font-black text-xs transition ${currentLesson === l.id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'} flex items-center gap-1">
             ${l.en}
-            <div class="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition">
-              <button onclick="event.stopPropagation(); editLesson(${l.id})" class="p-0.5 text-amber-300 hover:text-amber-200" title="Editar Lesson">
-                <i data-lucide="pencil" class="w-2.5 h-2.5"></i>
-              </button>
-            </div>
+            <span onclick="event.stopPropagation(); editLesson(${l.id})" class="lesson-edit-btn p-0.5 rounded-md text-slate-500 hover:text-amber-300 transition cursor-pointer" title="Editar Lesson">
+              <i data-lucide="pencil" class="w-2.5 h-2.5"></i>
+            </span>
           </button>
         `).join('');
       }
@@ -1192,19 +1180,26 @@ button{
     window.editItem = function(id) {
       const item = db.find(i => i.id === id);
       if(!item) return;
+      
+      // Preencher os campos hidden com os dados do item
       document.getElementById('input-edit-id').value = item.id;
-      
-      // Populate block dropdown
-      populateBlockDropdown('input-block', item.block);
-      
-      // Populate lesson dropdown
-      populateLessonDropdown('input-lesson', item.block, item.lesson);
-      
+      document.getElementById('input-block').value = item.block;
+      document.getElementById('input-lesson').value = item.lesson;
       document.getElementById('input-category').value = item.category;
+      
       document.getElementById('input-en').value = item.en;
       document.getElementById('input-speech').value = item.speech || '';
       document.getElementById('input-pt').value = item.pt;
-      document.getElementById('modal-title').innerText = 'Editar Item';
+      
+      // Definir o título do modal com a categoria
+      const categoryNames = {
+        'verbs': 'Verbs',
+        'words': 'New Words',
+        'phrases': 'Useful Phrases',
+        'real_life': 'Real Life',
+        'grammar': 'Grammar'
+      };
+      document.getElementById('modal-title').innerText = `Editar ${categoryNames[item.category] || 'Item'}`;
       openModal();
     }
 
@@ -1280,7 +1275,6 @@ button{
       const lesson = lessons.find(l => l.id === lessonId);
       if (!lesson) return;
       document.getElementById('input-lesson-en').value = lesson.en;
-      document.getElementById('input-lesson-pt').value = lesson.pt;
       populateBlockDropdown('input-lesson-block', lesson.blockId);
       document.getElementById('form-add-lesson').dataset.editId = lessonId;
       document.getElementById('modal-add-lesson').classList.remove('hidden');
@@ -1326,7 +1320,7 @@ button{
       const dropdown = document.getElementById(dropdownId);
       const blockLessons = lessons.filter(l => l.blockId === blockId);
       dropdown.innerHTML = blockLessons.map(l => 
-        `<option value="${l.id}" ${l.id === selectedValue ? 'selected' : ''}>${l.en} (${l.pt})</option>`
+        `<option value="${l.id}" ${l.id === selectedValue ? 'selected' : ''}>${l.en}</option>`
       ).join('');
       if (blockLessons.length === 0) {
         dropdown.innerHTML = `<option value="">Nenhuma lesson disponível</option>`;
@@ -1367,13 +1361,28 @@ button{
 
     window.openAddItemModal = function(category) {
       document.getElementById('input-edit-id').value = '';
-      document.getElementById('modal-title').innerText = 'Adicionar Novo Item';
+      
+      // Definir os valores hidden com o contexto atual
+      document.getElementById('input-block').value = currentBlock;
+      document.getElementById('input-lesson').value = currentLesson;
       document.getElementById('input-category').value = category;
       
-      populateBlockDropdown('input-block', currentBlock);
-      populateLessonDropdown('input-lesson', currentBlock, currentLesson);
+      // Limpar os campos de texto
+      document.getElementById('input-en').value = '';
+      document.getElementById('input-speech').value = '';
+      document.getElementById('input-pt').value = '';
       
-      document.getElementById('modal-add').classList.remove('hidden');
+      // Definir o título do modal com base na categoria
+      const categoryNames = {
+        'verbs': 'Verbs',
+        'words': 'New Words',
+        'phrases': 'Useful Phrases',
+        'real_life': 'Real Life',
+        'grammar': 'Grammar'
+      };
+      document.getElementById('modal-title').innerText = `Adicionar ${categoryNames[category] || 'Item'}`;
+      
+      openModal();
     }
 
     // Form submissions
@@ -1460,7 +1469,6 @@ button{
       e.preventDefault();
       const blockId = parseInt(document.getElementById('input-lesson-block').value, 10);
       const en = document.getElementById('input-lesson-en').value.trim();
-      const pt = document.getElementById('input-lesson-pt').value.trim();
       const editId = document.getElementById('form-add-lesson').dataset.editId;
 
       if (editId) {
@@ -1469,14 +1477,13 @@ button{
         if (lesson) {
           lesson.blockId = blockId;
           lesson.en = en;
-          lesson.pt = pt;
         }
         delete document.getElementById('form-add-lesson').dataset.editId;
       } else {
         // Create new lesson
         const blockLessons = lessons.filter(l => l.blockId === blockId);
         const newId = lessons.length > 0 ? Math.max(...lessons.map(l => l.id)) + 1 : 1;
-        lessons.push({ id: newId, blockId, en, pt });
+        lessons.push({ id: newId, blockId, en });
       }
 
       saveBlocksAndLessons();
