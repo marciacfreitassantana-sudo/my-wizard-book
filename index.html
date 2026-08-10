@@ -414,11 +414,6 @@ body.theme-light .theme-toggle .theme-icon-light{display:block;}
 .confirm-card{width:min(440px,100%);padding:24px;border-radius:24px;background:linear-gradient(145deg,#111a28,#0b1018);border:1px solid rgba(96,165,250,.18);box-shadow:0 30px 90px rgba(0,0,0,.6);}
 body.theme-light .confirm-card{background:#fff;border-color:#e2e8f0;box-shadow:0 25px 70px rgba(15,23,42,.18);}
 .modal-large{max-width:560px!important;padding:28px!important;} .modal-large form{gap:16px!important;} .modal-large input,.modal-large select,.modal-large textarea{padding:14px!important;min-height:46px;}
-.auth-overlay{position:fixed;inset:0;z-index:200;background:radial-gradient(circle at 50% 0%,rgba(59,130,246,.13),transparent 35%),#070a0f;display:flex;align-items:center;justify-content:center;padding:20px;}
-.auth-card{width:min(430px,100%);border:1px solid rgba(96,165,250,.18);background:linear-gradient(145deg,#111a28,#0a0f17);border-radius:28px;padding:30px;box-shadow:0 35px 100px rgba(0,0,0,.6);}
-body.theme-light .auth-overlay{background:#f8fafc;} body.theme-light .auth-card{background:#fff;border-color:#e2e8f0;box-shadow:0 25px 70px rgba(15,23,42,.15);} body.theme-light .auth-card h2{color:#0f172a!important;} body.theme-light .confirm-card h3{color:#0f172a!important;}
-.auth-card input{width:100%;padding:13px 14px;border-radius:12px;border:1px solid rgba(148,163,184,.18);background:rgba(7,12,18,.82);color:white;outline:none;} body.theme-light .auth-card input{background:#fff;color:#0f172a;border-color:#cbd5e1;}
-.auth-user{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 @media(max-width:640px){.toast-stack{left:14px;right:14px;bottom:14px}.mw-toast{min-width:0;width:100%;}.modal-large{padding:22px!important;}}
 </style>
 </head>
@@ -457,7 +452,6 @@ body.theme-light .auth-overlay{background:#f8fafc;} body.theme-light .auth-card{
           <i data-lucide="moon" class="theme-icon-dark"></i>
           <i data-lucide="sun" class="theme-icon-light"></i>
         </button>
-        <button id="auth-user-btn" onclick="handleAuthButton()" class="hidden px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-bold transition flex items-center gap-1.5" title="Conta"><i data-lucide="user-circle" class="w-4 h-4"></i><span id="auth-user-label" class="auth-user"></span></button>
         <button onclick="openPracticeModal()" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-lg shadow-blue-600/20 flex items-center gap-1.5">
           <i data-lucide="gamepad-2" class="w-4 h-4"></i> Praticar
         </button>
@@ -831,14 +825,6 @@ body.theme-light .auth-overlay{background:#f8fafc;} body.theme-light .auth-card{
       </form>
     </div>
   </div>
-
-  <div id="auth-overlay" class="auth-overlay hidden">
-    <div class="auth-card">
-      <div class="flex items-start justify-between gap-4 mb-6"><div><p class="text-[10px] font-black uppercase tracking-[.18em] text-blue-400 mb-2">My Wizard Book</p><h2 id="auth-title" class="text-2xl font-black text-white">Entrar</h2><p id="auth-subtitle" class="text-xs text-slate-400 mt-1">Acesse seu aplicativo em qualquer dispositivo.</p></div><div class="w-11 h-11 rounded-2xl bg-blue-500/10 text-blue-300 flex items-center justify-center"><i data-lucide="cloud" class="w-5 h-5"></i></div></div>
-      <form id="auth-form" class="space-y-3"><div><label class="block text-xs font-bold text-slate-400 mb-1.5">E-mail</label><input id="auth-email" type="email" autocomplete="email" placeholder="seu@email.com" required /></div><div><label class="block text-xs font-bold text-slate-400 mb-1.5">Senha</label><input id="auth-password" type="password" autocomplete="current-password" placeholder="••••••••" minlength="6" required /></div><button id="auth-submit" type="submit" class="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-sm transition">Entrar</button></form>
-      <button id="auth-toggle" type="button" onclick="toggleAuthMode()" class="w-full mt-3 py-2.5 text-xs font-bold text-slate-400 hover:text-blue-300 transition">Criar uma conta</button><p id="auth-error" class="hidden mt-4 text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl p-3"></p>
-    </div>
-  </div>
   <div id="confirm-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[210] flex items-center justify-center p-4"><div class="confirm-card"><div class="flex items-start gap-4"><div class="w-11 h-11 rounded-2xl bg-rose-500/10 text-rose-300 flex items-center justify-center shrink-0"><i data-lucide="trash-2" class="w-5 h-5"></i></div><div class="min-w-0"><h3 id="confirm-title" class="text-lg font-black text-white">Confirmar</h3><p id="confirm-message" class="text-xs leading-5 text-slate-400 mt-1"></p></div></div><div class="flex gap-2 mt-6"><button id="confirm-cancel" type="button" class="w-1/2 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm transition">Cancelar</button><button id="confirm-ok" type="button" class="w-1/2 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm transition">Excluir</button></div></div></div>
   <div id="toast-stack" class="toast-stack"></div>
 
@@ -846,7 +832,6 @@ body.theme-light .auth-overlay{background:#f8fafc;} body.theme-light .auth-card{
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, runTransaction, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBD7dbcn_CVuUKVxVrvJKrI7UhkETLqKBM",
@@ -859,8 +844,6 @@ body.theme-light .auth-overlay{background:#f8fafc;} body.theme-light .auth-card{
 
     const app = initializeApp(firebaseConfig);
     const dbCloud = getFirestore(app);
-    const auth = getAuth(app);
-    let currentUser = null;
     let appInitialized = false;
 
     // Variáveis globais do app
@@ -1897,12 +1880,6 @@ body.theme-light .auth-overlay{background:#f8fafc;} body.theme-light .auth-card{
       }
     });
 
-    let authMode='login';
-    window.toggleAuthMode=function(){authMode=authMode==='login'?'register':'login';document.getElementById('auth-title').innerText=authMode==='login'?'Entrar':'Criar conta';document.getElementById('auth-subtitle').innerText=authMode==='login'?'Acesse seu aplicativo em qualquer dispositivo.':'Crie sua conta para manter seus dados protegidos.';document.getElementById('auth-submit').innerText=authMode==='login'?'Entrar':'Criar conta';document.getElementById('auth-toggle').innerText=authMode==='login'?'Criar uma conta':'Já tenho uma conta';document.getElementById('auth-error').classList.add('hidden');};
-    window.handleAuthButton=async function(){if(!currentUser)return;const ok=await showConfirm('Você será desconectada deste dispositivo. Seus dados continuam no Firebase.','Sair da conta?');if(ok)await signOut(auth);};
-    function setAuthError(m){const e=document.getElementById('auth-error');e.innerText=m;e.classList.remove('hidden');}
-    document.getElementById('auth-form').addEventListener('submit',async e=>{e.preventDefault();const email=document.getElementById('auth-email').value.trim(),password=document.getElementById('auth-password').value,button=document.getElementById('auth-submit');button.disabled=true;button.innerText=authMode==='login'?'Entrando...':'Criando...';document.getElementById('auth-error').classList.add('hidden');try{if(authMode==='login')await signInWithEmailAndPassword(auth,email,password);else await createUserWithEmailAndPassword(auth,email,password);}catch(error){const m={'auth/invalid-credential':'E-mail ou senha incorretos.','auth/email-already-in-use':'Este e-mail já possui uma conta.','auth/weak-password':'A senha precisa ter pelo menos 6 caracteres.','auth/invalid-email':'Digite um e-mail válido.'};setAuthError(m[error.code]||'Não foi possível concluir o acesso. Verifique sua conexão e tente novamente.');}finally{button.disabled=false;button.innerText=authMode==='login'?'Entrar':'Criar conta';}});
-    function updateAuthUI(user){const overlay=document.getElementById('auth-overlay'),btn=document.getElementById('auth-user-btn');if(user){overlay.classList.add('hidden');btn.classList.remove('hidden');document.getElementById('auth-user-label').innerText=user.email||'Conta';document.getElementById('stat-cloud-status').innerText='Sincronizado com o Firebase';}else{overlay.classList.remove('hidden');btn.classList.add('hidden');document.getElementById('stat-cloud-status').innerText='Faça login para sincronizar';}if(window.lucide)lucide.createIcons();}
 
     // Quiz functions
     function transformSentence(en, targetType) {
@@ -2132,7 +2109,7 @@ body.theme-light .auth-overlay{background:#f8fafc;} body.theme-light .auth-card{
     }
 
     // Iniciar dados do Firebase ao carregar a página
-    document.addEventListener('DOMContentLoaded',()=>{onAuthStateChanged(auth,async user=>{currentUser=user;updateAuthUI(user);if(user&&!appInitialized){appInitialized=true;await loadDataFromFirebase();}else if(!user){appInitialized=false;realtimeUnsubscribers.forEach(fn=>fn&&fn());realtimeUnsubscribers=[];}});});
+    document.addEventListener('DOMContentLoaded',async()=>{if(!appInitialized){appInitialized=true;await loadDataFromFirebase();}});
   </script>
 
 <script>
