@@ -584,18 +584,8 @@ body.theme-light .confirm-card{background:#fff;border-color:#e2e8f0;box-shadow:0
           </div>
         </div>
 
-        <!-- REAL LIFE & GRAMMAR -->
+        <!-- GRAMMAR & REAL LIFE -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-            <div class="bg-teal-700 px-4 py-2.5 flex items-center justify-between">
-              <h3 class="font-black text-sm tracking-wider uppercase text-white">REAL LIFE</h3>
-              <button onclick="openAddItemModal('real_life')" class="add-btn text-white border-white/20 hover:border-white/40">
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Adicionar
-              </button>
-            </div>
-            <div class="p-4 space-y-2" id="container-real-life"></div>
-          </div>
-
           <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
             <div class="bg-purple-700 px-4 py-2.5 flex items-center justify-between">
               <h3 class="font-black text-sm tracking-wider uppercase text-white">GRAMMAR</h3>
@@ -604,6 +594,16 @@ body.theme-light .confirm-card{background:#fff;border-color:#e2e8f0;box-shadow:0
               </button>
             </div>
             <div class="p-4 space-y-2" id="container-grammar"></div>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+            <div class="bg-teal-700 px-4 py-2.5 flex items-center justify-between">
+              <h3 class="font-black text-sm tracking-wider uppercase text-white">REAL LIFE</h3>
+              <button onclick="openAddItemModal('real_life')" class="add-btn text-white border-white/20 hover:border-white/40">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Adicionar
+              </button>
+            </div>
+            <div class="p-4 space-y-2" id="container-real-life"></div>
           </div>
         </div>
 
@@ -1997,9 +1997,21 @@ body.theme-light .confirm-card{background:#fff;border-color:#e2e8f0;box-shadow:0
     }
 
     function normalizeText(txt) {
-      return txt.trim().toLowerCase()
+      return String(txt || '').trim().toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "")
         .replace(/\s+/g, " ");
+    }
+
+    // Permite múltiplas respostas válidas no campo de tradução.
+    // Ex.: "tomar, beber" aceita "tomar" OU "beber".
+    function getAcceptedAnswers(rawAnswer) {
+      const raw = String(rawAnswer || '').trim();
+      if (!raw) return [];
+      return raw
+        .split(/\s*(?:,|;|\/|\||\s+ou\s+)\s*/i)
+        .map(answer => normalizeText(answer))
+        .filter(Boolean);
     }
 
     window.submitWriteAnswer = function(e) {
@@ -2009,17 +2021,24 @@ body.theme-light .confirm-card{background:#fff;border-color:#e2e8f0;box-shadow:0
 
       const q = quizQueue[quizIndex];
       const item = q.item;
-      const userInput = normalizeText(document.getElementById('quiz-write-input').value);
+      const rawUserInput = document.getElementById('quiz-write-input').value;
+      const userInput = normalizeText(rawUserInput);
       
       let expectedRaw = item.en;
       if (q.type === 'write_pt') expectedRaw = item.pt;
       if (q.type === 'transform') expectedRaw = transformSentence(item.en, q.transformType);
 
-      const expected = normalizeText(expectedRaw);
+      // Para traduções, cada significado separado por vírgula, ponto e vírgula,
+      // barra, "|" ou "ou" é considerado uma resposta correta independente.
+      const acceptedAnswers = q.type === 'write_pt'
+        ? getAcceptedAnswers(expectedRaw)
+        : [normalizeText(expectedRaw)];
+      const isCorrect = acceptedAnswers.includes(userInput);
+
       const feedback = document.getElementById('quiz-write-feedback');
       feedback.classList.remove('hidden');
 
-      if (userInput === expected) {
+      if (isCorrect) {
         quizCorrectCount++;
         feedback.className = "p-4 rounded-2xl text-center font-bold bg-teal-950/70 border border-teal-500 text-teal-100";
         feedback.innerText = "✨ Perfeito! Excelente resposta!";
