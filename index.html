@@ -244,6 +244,18 @@ button{
   color: var(--mw-gold-light);
   background: rgba(251,191,36,0.12);
 }
+
+/* Practice visual refresh */
+#view-quiz-game{max-width:760px!important;}
+#view-quiz-game .quiz-shell{background:linear-gradient(145deg,rgba(17,26,40,.96),rgba(7,10,15,.98));border:1px solid rgba(96,165,250,.16);box-shadow:0 24px 70px rgba(0,0,0,.35);}
+.quiz-progress-track{height:6px;background:rgba(148,163,184,.12);border-radius:999px;overflow:hidden;}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#8b5cf6,#2dd4bf);border-radius:999px;transition:width .25s ease;}
+.quiz-answer-card{background:rgba(7,10,15,.55);border:1px solid rgba(148,163,184,.13);}
+.quiz-feedback-good{background:rgba(13,59,52,.58)!important;border-color:rgba(45,212,191,.55)!important;color:#ccfbf1!important;}
+.quiz-feedback-bad{background:rgba(49,32,69,.62)!important;border-color:rgba(167,139,250,.55)!important;color:#ede9fe!important;}
+.quiz-error-explanation{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.18);color:#fde68a;font-size:12px;font-weight:600;text-align:left;}
+.practice-limit-note{font-size:11px;color:#94a3b8;line-height:1.45;}
+@media(max-width:640px){#view-quiz-game{padding-top:12px!important;}#view-quiz-game .quiz-shell{border-radius:24px!important;padding:18px!important;}}
 </style>
 
 
@@ -621,75 +633,38 @@ body.theme-light .confirm-card{background:#fff;border-color:#e2e8f0;box-shadow:0
     </section>
 
     <!-- MODO QUIZ GAME -->
-    <section id="view-quiz-game" class="hidden max-w-xl mx-auto space-y-6 py-6">
-      <div class="flex items-center justify-between bg-slate-900 p-4 rounded-2xl border border-slate-800">
-        <button onclick="showBlockGrid()" class="text-xs font-bold text-slate-400 hover:text-white flex items-center gap-1">
-          <i data-lucide="x" class="w-5 h-5"></i> Sair do Treino
-        </button>
-        <span class="text-xs font-bold text-amber-300" id="quiz-progress-text">Questão 1/10</span>
-      </div>
-
-      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl text-center space-y-6">
-        <div class="space-y-2">
-          <span id="quiz-category-badge" class="text-[10px] font-bold uppercase tracking-wider bg-slate-800 px-3 py-1 rounded-full text-slate-400 border border-slate-700">VOCABULÁRIO</span>
-          <p class="text-xs text-teal-300 font-bold" id="quiz-instruction">Como se diz em inglês?</p>
-          <h2 id="quiz-question-title" class="text-2xl font-black text-white pt-1">Word</h2>
+    <section id="view-quiz-game" class="hidden max-w-xl mx-auto space-y-4 py-6">
+      <div class="quiz-shell rounded-3xl p-4 sm:p-5">
+        <div class="flex items-center justify-between gap-3 mb-3">
+          <button onclick="showBlockGrid()" class="text-xs font-bold text-slate-400 hover:text-white flex items-center gap-1.5 transition"><i data-lucide="x" class="w-4 h-4"></i> Sair do Treino</button>
+          <span class="text-xs font-black text-blue-300" id="quiz-progress-text">Questão 1 de 20</span>
         </div>
-
-        <button id="quiz-audio-btn" onclick="playCurrentQuizAudio()" class="mx-auto w-16 h-16 rounded-2xl bg-blue-600/20 hover:bg-blue-600/40 border border-sky-500/30 flex items-center justify-center text-blue-300 transition transform active:scale-95 shadow-lg shadow-sky-600/10">
-          <i data-lucide="volume-2" class="w-8 h-8"></i>
-        </button>
-
-        <form id="quiz-write-form" onsubmit="submitWriteAnswer(event)" class="space-y-4 pt-2">
-          <input type="text" id="quiz-write-input" placeholder="Digite sua resposta..." autocomplete="off" class="w-full bg-slate-950 border-2 border-slate-700 focus:border-blue-500 text-white font-bold text-center text-base rounded-2xl p-4 outline-none transition" />
-          <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black text-sm rounded-2xl transition shadow-lg shadow-blue-600/20">Verificar Resposta</button>
-        </form>
-
-        <button id="quiz-skip-audio-btn" onclick="skipAudioQuestion()" class="hidden w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2">
-          <i data-lucide="volume-x" class="w-4 h-4"></i> Não posso ouvir agora (Pular)
-        </button>
-
-        <div id="quiz-write-feedback" class="hidden p-4 rounded-2xl text-center text-sm font-bold"></div>
+        <div class="quiz-progress-track mb-5"><div id="quiz-progress-fill" class="quiz-progress-fill" style="width:0%"></div></div>
+        <div class="quiz-answer-card rounded-3xl p-5 sm:p-7 text-center space-y-5">
+          <div class="space-y-2">
+            <span id="quiz-category-badge" class="hidden"></span>
+            <p class="text-xs text-teal-300 font-bold pt-1" id="quiz-instruction">Como se diz em inglês?</p>
+            <h2 id="quiz-question-title" class="text-2xl sm:text-3xl font-black text-white pt-1 leading-tight">Word</h2>
+            <div id="quiz-choice-options" class="hidden grid grid-cols-1 gap-2.5 pt-2"></div>
+          </div>
+          <button id="quiz-audio-btn" onclick="playCurrentQuizAudio()" class="mx-auto w-16 h-16 rounded-2xl bg-blue-600/15 hover:bg-blue-600/30 border border-sky-500/30 flex items-center justify-center text-blue-300 transition transform active:scale-95 shadow-lg shadow-sky-600/10"><i data-lucide="volume-2" class="w-8 h-8"></i></button>
+          <form id="quiz-write-form" onsubmit="submitWriteAnswer(event)" class="space-y-3 pt-1">
+            <input type="text" id="quiz-write-input" placeholder="Digite sua resposta..." autocomplete="off" class="w-full bg-slate-950/80 border-2 border-slate-700 focus:border-blue-500 text-white font-bold text-center text-base rounded-2xl p-4 outline-none transition" />
+            <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black text-sm rounded-2xl transition shadow-lg shadow-blue-600/20">Verificar Resposta</button>
+          </form>
+          <button id="quiz-skip-audio-btn" onclick="skipAudioQuestion()" class="hidden w-full py-2.5 bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2"><i data-lucide="volume-x" class="w-4 h-4"></i> Não posso ouvir agora (Pular)</button>
+          <div id="quiz-write-feedback" class="hidden p-4 rounded-2xl text-center text-sm font-bold"></div>
+        </div>
       </div>
     </section>
 
     <!-- RELATÓRIO FINAL -->
     <section id="view-quiz-results" class="hidden max-w-lg mx-auto space-y-6 py-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl text-center space-y-6">
-        <div class="space-y-2">
-          <div class="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 text-teal-300 rounded-full flex items-center justify-center mx-auto">
-            <i data-lucide="trophy" class="w-8 h-8"></i>
-          </div>
-          <h2 class="text-2xl font-black text-white">Treino Concluído!</h2>
-          <p class="text-xs text-slate-400" id="quiz-feedback-subtitle">Confira seu desempenho abaixo</p>
-        </div>
-
-        <div class="grid grid-cols-3 gap-3 bg-slate-950 p-4 rounded-2xl border border-slate-800">
-          <div>
-            <p class="text-[10px] font-bold text-slate-500 uppercase">Precisão</p>
-            <p class="text-xl font-black text-teal-300" id="res-accuracy">100%</p>
-          </div>
-          <div class="border-x border-slate-800">
-            <p class="text-[10px] font-bold text-slate-500 uppercase">Acertos</p>
-            <p class="text-xl font-black text-blue-300" id="res-correct">0</p>
-          </div>
-          <div>
-            <p class="text-[10px] font-bold text-slate-500 uppercase">Erros</p>
-            <p class="text-xl font-black text-slate-300" id="res-wrong">0</p>
-          </div>
-        </div>
-
-        <div id="quiz-wrongs-wrapper" class="text-left space-y-3 pt-2 hidden">
-          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-            <i data-lucide="alert-circle" class="w-4 h-4 text-slate-300"></i> Para Revisar:
-          </h3>
-          <div id="quiz-wrongs-list" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
-        </div>
-
-        <div class="flex gap-3 pt-2">
-          <button onclick="showBlockGrid()" class="w-1/2 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl transition">Voltar ao Início</button>
-          <button onclick="openPracticeModal()" class="w-1/2 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-blue-600/20">Treinar Novamente</button>
-        </div>
+      <div class="quiz-shell rounded-3xl p-6 sm:p-7 text-center space-y-6">
+        <div class="space-y-2"><div class="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 text-teal-300 rounded-full flex items-center justify-center mx-auto"><i data-lucide="trophy" class="w-8 h-8"></i></div><h2 class="text-2xl font-black text-white">Treino Concluído!</h2><p class="text-xs text-slate-400" id="quiz-feedback-subtitle">Confira seu desempenho abaixo</p></div>
+        <div class="grid grid-cols-3 gap-3 bg-slate-950/70 p-4 rounded-2xl border border-slate-800"><div><p class="text-[10px] font-bold text-slate-500 uppercase">Precisão</p><p class="text-xl font-black text-teal-300" id="res-accuracy">100%</p></div><div class="border-x border-slate-800"><p class="text-[10px] font-bold text-slate-500 uppercase">Acertos</p><p class="text-xl font-black text-blue-300" id="res-correct">0</p></div><div><p class="text-[10px] font-bold text-slate-500 uppercase">Erros</p><p class="text-xl font-black text-slate-300" id="res-wrong">0</p></div></div>
+        <div id="quiz-wrongs-wrapper" class="text-left space-y-3 pt-1 hidden"><h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><i data-lucide="alert-circle" class="w-4 h-4 text-amber-300"></i> Para revisar</h3><div id="quiz-wrongs-list" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div></div>
+        <div class="flex gap-3 pt-1"><button onclick="showBlockGrid()" class="w-1/2 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl transition">Voltar ao Início</button><button onclick="openPracticeModal()" class="w-1/2 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-blue-600/20">Treinar Novamente</button></div>
       </div>
     </section>
 
@@ -711,6 +686,7 @@ body.theme-light .confirm-card{background:#fff;border-color:#e2e8f0;box-shadow:0
         <div>
           <label class="block text-xs font-bold text-slate-400 mb-1">Selecione a Lesson</label>
           <select id="practice-select-lesson" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white outline-none"></select>
+          <p class="practice-limit-note mt-2">O treino é limitado a <strong class="text-slate-200">20 questões</strong> por sessão. Ao selecionar todas as Lessons, o aplicativo escolherá uma amostra aleatória do conteúdo desse bloco.</p>
         </div>
         <button onclick="startPracticeSession()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-xl transition shadow-lg shadow-blue-600/20">Começar Treino Completo</button>
       </div>
@@ -1896,49 +1872,108 @@ body.theme-light .confirm-card{background:#fff;border-color:#e2e8f0;box-shadow:0
       return en;
     }
 
+    const MAX_PRACTICE_QUESTIONS = 20;
+
+    // Gera atividades novas SOMENTE a partir do conteúdo que já foi cadastrado.
+    // Não usamos templates com vocabulário inventado. Para itens isolados,
+    // geramos múltipla escolha usando apenas outros itens da mesma seleção.
+    function buildGeneratedActivity(item, pool) {
+      const category = item.category;
+      const en = String(item.en || '').trim();
+      const pt = String(item.pt || '').trim();
+
+      // Para frases, Real Life e Grammar: remove uma palavra da própria frase
+      // cadastrada e cria alternativas usando somente palavras já presentes
+      // no conteúdo selecionado.
+      if (['phrases', 'real_life', 'grammar'].includes(category)) {
+        const words = en.replace(/[?!.,]/g, '').split(/\s+/).filter(Boolean);
+        const ignored = new Set(['i','you','he','she','it','we','they','a','an','the','and','or','but','to','of','in','on','at','is','are','am','do','does','did','my','your','his','her','our','their','for','with','this','that']);
+        const candidates = words.filter(w => w.length >= 3 && !ignored.has(w.toLowerCase()));
+        if (candidates.length) {
+          const target = candidates[Math.floor(Math.random() * candidates.length)];
+          const escaped = target.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const re = new RegExp('\\b' + escaped + '\\b', 'i');
+          const sentence = en.replace(re, '_____');
+
+          const registeredWords = [];
+          pool.forEach(other => {
+            String(other.en || '').replace(/[?!.,]/g, '').split(/\s+/).forEach(w => {
+              if (w.length >= 3 && !ignored.has(w.toLowerCase())) registeredWords.push(w);
+            });
+          });
+          const unique = [...new Map(registeredWords.map(w => [normalizeText(w), w])).values()];
+          const distractors = unique.filter(w => normalizeText(w) !== normalizeText(target));
+          distractors.sort(() => Math.random() - 0.5);
+          const options = [target, ...distractors.slice(0, 2)].sort(() => Math.random() - 0.5);
+
+          if (options.length >= 2) {
+            return {
+              type: 'generated_choice',
+              prompt: '🧩 Complete a frase usando uma palavra do conteúdo estudado:',
+              question: sentence,
+              answer: target,
+              options,
+              audioText: en
+            };
+          }
+        }
+      }
+
+      // Para Words e Verbs (e qualquer item isolado), criamos uma atividade
+      // de reconhecimento usando SOMENTE itens já cadastrados na seleção.
+      const sameType = pool.filter(other => other.category === category && normalizeText(other.en) !== normalizeText(en));
+      const distractors = sameType.sort(() => Math.random() - 0.5).slice(0, 2).map(other => String(other.en || '').trim()).filter(Boolean);
+      const options = [en, ...distractors].sort(() => Math.random() - 0.5);
+      if (pt && options.length >= 2) {
+        return {
+          type: 'generated_choice',
+          prompt: category === 'verbs' ? '🧠 Qual verbo corresponde ao significado abaixo?' : '🧠 Qual palavra corresponde ao significado abaixo?',
+          question: pt,
+          answer: en,
+          options,
+          audioText: en
+        };
+      }
+
+      // Se não houver material suficiente para gerar uma atividade nova,
+      // não inventamos nada: o item continua disponível nas atividades básicas.
+      return null;
+    }
+
     window.startPracticeSession = function() {
       const block = parseInt(document.getElementById('practice-select-block').value, 10);
       const lessonVal = document.getElementById('practice-select-lesson').value;
-
       currentPracticeBlock = block;
+
       let filtered = db.filter(i => i.block === block);
       if (lessonVal !== 'all') filtered = filtered.filter(i => i.lesson === parseInt(lessonVal, 10));
 
-      // Add avulsas to practice
-      const avulsasToPractice = [...avulsas];
-      
-      if (filtered.length === 0 && avulsasToPractice.length === 0) {
-        return alert('Nenhum item encontrado nesta seleção.');
-      }
+      // A prática respeita rigorosamente o Block/Lesson selecionado.
+      // New Words Avulsas não entram porque não pertencem a uma Lesson.
+      if (filtered.length === 0) return alert('Nenhum item encontrado nesta seleção.');
 
-      quizQueue = [];
-      
+      const candidateQueue = [];
       filtered.forEach(item => {
-        quizQueue.push({ item, type: 'dictation_blind' });
-        quizQueue.push({ item, type: Math.random() > 0.5 ? 'write_en' : 'write_pt' });
+        // Atividades básicas usam somente o conteúdo cadastrado.
+        candidateQueue.push({ item, type: 'dictation_blind' });
+        candidateQueue.push({ item, type: Math.random() > 0.5 ? 'write_en' : 'write_pt' });
 
-        if (item.category === 'phrases' || item.category === 'verbs') {
-          const transformType = Math.random() > 0.5 ? 'negative' : 'interrogative';
-          quizQueue.push({ item, type: 'transform', transformType });
-        }
+        // Atividade gerada: somente conteúdo já cadastrado na seleção.
+        const generated = buildGeneratedActivity(item, filtered);
+        if (generated) candidateQueue.push({ item, ...generated });
       });
 
-      avulsasToPractice.forEach(av => {
-        quizQueue.push({ item: { ...av, category: 'avulsa', block: block, lesson: lessonVal === 'all' ? 1 : parseInt(lessonVal, 10) }, type: 'dictation_blind' });
-        quizQueue.push({ item: { ...av, category: 'avulsa', block: block, lesson: lessonVal === 'all' ? 1 : parseInt(lessonVal, 10) }, type: Math.random() > 0.5 ? 'write_en' : 'write_pt' });
-      });
-
-      quizQueue = quizQueue.sort(() => 0.5 - Math.random());
-      quizIndex = 0;
-      quizCorrectCount = 0;
-      quizWrongItems = [];
+      // Em cada sessão, embaralhamos tudo para evitar que o treino pareça
+      // uma simples lista do conteúdo cadastrado.
+      candidateQueue.sort(() => Math.random() - 0.5);
+      quizQueue = candidateQueue.slice(0, MAX_PRACTICE_QUESTIONS);
+      quizIndex = 0; quizCorrectCount = 0; quizWrongItems = [];
 
       closePracticeModal();
       document.getElementById('view-blocks-grid').classList.add('hidden');
       document.getElementById('view-lesson-content').classList.add('hidden');
       document.getElementById('view-quiz-results').classList.add('hidden');
       document.getElementById('view-quiz-game').classList.remove('hidden');
-
       renderQuizQuestion();
     }
 
@@ -1948,7 +1983,10 @@ body.theme-light .confirm-card{background:#fff;border-color:#e2e8f0;box-shadow:0
       const item = q.item;
 
       document.getElementById('quiz-progress-text').innerText = `Questão ${quizIndex + 1} de ${quizQueue.length}`;
-      document.getElementById('quiz-category-badge').innerText = `${item.category} • Bloco ${item.block} / Lesson ${item.lesson}`;
+      const progressFill = document.getElementById('quiz-progress-fill');
+      if (progressFill) progressFill.style.width = `${Math.round(((quizIndex + 1) / quizQueue.length) * 100)}%`;
+      const categoryLabels = { verbs:'Verbs', words:'New Words', phrases:'Useful Phrases', real_life:'Real Life', grammar:'Grammar' };
+      document.getElementById('quiz-category-badge').innerText = ''; document.getElementById('quiz-category-badge').classList.add('hidden');
 
       const writeInput = document.getElementById('quiz-write-input');
       const writeFeedback = document.getElementById('quiz-write-feedback');
@@ -1959,20 +1997,31 @@ body.theme-light .confirm-card{background:#fff;border-color:#e2e8f0;box-shadow:0
       skipAudioBtn.classList.add('hidden');
       writeInput.value = '';
 
-      if (q.type === 'dictation_blind') {
+      const choiceBox = document.getElementById('quiz-choice-options');
+      choiceBox.classList.add('hidden');
+      choiceBox.innerHTML = '';
+      writeInput.classList.remove('hidden');
+      document.querySelector('#quiz-write-form button[type=submit]').classList.remove('hidden');
+
+      if (q.type === 'generated_choice') {
+        document.getElementById('quiz-instruction').innerText = q.prompt;
+        document.getElementById('quiz-question-title').innerText = q.question;
+        audioBtn.classList.remove('hidden');
+        writeInput.classList.add('hidden');
+        document.querySelector('#quiz-write-form button[type=submit]').classList.add('hidden');
+        const choiceBox = document.getElementById('quiz-choice-options');
+        choiceBox.classList.remove('hidden');
+        choiceBox.innerHTML = q.options.map((option, idx) => `<button type="button" class="quiz-choice-btn w-full p-3 rounded-2xl border border-slate-700 bg-slate-800/70 hover:bg-slate-700 text-white font-bold text-sm transition text-left" data-choice-index="${idx}">${option}</button>`).join('');
+        choiceBox.querySelectorAll('.quiz-choice-btn').forEach(btn => btn.addEventListener('click', () => submitGeneratedChoice(btn.textContent.trim())));
+        window.currentGeneratedAudioText = q.audioText || q.answer;
+
+      } else if (q.type === 'dictation_blind') {
         document.getElementById('quiz-instruction').innerText = "🎧 Escute e escreva EXATAMENTE em inglês:";
-        document.getElementById('quiz-question-title').innerText = "🔊 [Clique para ouvir]";
+        document.getElementById('quiz-question-title').innerText = "Ouça o áudio e escreva sua resposta";
         audioBtn.classList.remove('hidden');
         skipAudioBtn.classList.remove('hidden');
         writeInput.placeholder = "Escreva o que ouviu...";
         speak(item.en);
-
-      } else if (q.type === 'transform') {
-        const isNeg = q.transformType === 'negative';
-        document.getElementById('quiz-instruction').innerText = isNeg ? "🔄 Mude esta frase para a NEGATIVA:" : "🔄 Mude esta frase para a INTERROGATIVA:";
-        document.getElementById('quiz-question-title').innerText = item.en;
-        audioBtn.classList.remove('hidden');
-        writeInput.placeholder = isNeg ? "Ex: I don't..." : "Ex: Do you...";
 
       } else if (q.type === 'write_en') {
         document.getElementById('quiz-instruction').innerText = "✍️ Traduza para o INGLÊS:";
@@ -1985,7 +2034,6 @@ body.theme-light .confirm-card{background:#fff;border-color:#e2e8f0;box-shadow:0
         document.getElementById('quiz-question-title').innerText = item.en;
         audioBtn.classList.remove('hidden');
         writeInput.placeholder = "Escreva em português...";
-        speak(item.en);
       }
 
       setTimeout(() => writeInput.focus(), 100);
@@ -1993,7 +2041,10 @@ body.theme-light .confirm-card{background:#fff;border-color:#e2e8f0;box-shadow:0
     }
 
     window.playCurrentQuizAudio = function() {
-      if(quizQueue[quizIndex]) speak(quizQueue[quizIndex].item.en);
+      const q = quizQueue[quizIndex];
+      if (!q) return;
+      if (q.type === 'generated_choice') speak(q.audioText || q.answer);
+      else speak(q.item.en);
     }
 
     function normalizeText(txt) {
@@ -2014,42 +2065,72 @@ body.theme-light .confirm-card{background:#fff;border-color:#e2e8f0;box-shadow:0
         .filter(Boolean);
     }
 
+    window.submitGeneratedChoice = function(selected) {
+      if (isAnswering) return;
+      isAnswering = true;
+      const q = quizQueue[quizIndex];
+      const item = q.item;
+      const userInput = normalizeText(selected);
+      const expectedRaw = q.answer;
+      const isCorrect = userInput === normalizeText(expectedRaw);
+      const feedback = document.getElementById('quiz-write-feedback');
+      feedback.classList.remove('hidden');
+      document.querySelectorAll('.quiz-choice-btn').forEach(btn => {
+        btn.disabled = true;
+        const value = normalizeText(btn.textContent);
+        if (value === normalizeText(expectedRaw)) btn.classList.add('border-emerald-500/60','bg-emerald-500/10');
+        else if (value === userInput) btn.classList.add('border-rose-500/60','bg-rose-500/10');
+      });
+      if (isCorrect) {
+        quizCorrectCount++;
+        feedback.className = 'quiz-feedback-good p-4 rounded-2xl text-center text-sm font-bold';
+        feedback.innerHTML = '✨ <strong>Resposta correta!</strong><div class="text-xs font-medium mt-1 opacity-80">Muito bem. Continue assim.</div>';
+      } else {
+        quizWrongItems.push({ item, chosen: selected || '(em branco)', expected: expectedRaw });
+        feedback.className = 'quiz-feedback-bad p-4 rounded-2xl text-center text-sm font-bold';
+        feedback.innerHTML = `<div>❌ <strong>Vamos aprender com o erro.</strong></div><div class="mt-2 text-xs font-medium">Sua resposta: <span class="text-white">${selected || '(em branco)'}</span></div><div class="mt-1 text-xs font-medium">Resposta correta: <strong class="text-white underline">${expectedRaw}</strong></div><div class="quiz-error-explanation">💡 As alternativas foram montadas somente com conteúdo já cadastrado. Revise a palavra correta no contexto.</div>`;
+      }
+      setTimeout(nextQuestion, 3000);
+    }
+
     window.submitWriteAnswer = function(e) {
       e.preventDefault();
       if (isAnswering) return;
       isAnswering = true;
-
       const q = quizQueue[quizIndex];
       const item = q.item;
       const rawUserInput = document.getElementById('quiz-write-input').value;
       const userInput = normalizeText(rawUserInput);
-      
       let expectedRaw = item.en;
       if (q.type === 'write_pt') expectedRaw = item.pt;
       if (q.type === 'transform') expectedRaw = transformSentence(item.en, q.transformType);
-
-      // Para traduções, cada significado separado por vírgula, ponto e vírgula,
-      // barra, "|" ou "ou" é considerado uma resposta correta independente.
-      const acceptedAnswers = q.type === 'write_pt'
-        ? getAcceptedAnswers(expectedRaw)
-        : [normalizeText(expectedRaw)];
+      if (q.type === 'generated_choice') expectedRaw = q.answer;
+      let acceptedAnswers = q.type === 'write_pt' ? getAcceptedAnswers(expectedRaw) : [normalizeText(expectedRaw)];
+      if (q.type === 'generated_choice' && item.category === 'verbs') {
+        const verbBase = normalizeText(String(expectedRaw).replace(/^to\s+/i, ''));
+        const verbWithTo = normalizeText(expectedRaw);
+        acceptedAnswers = [...new Set([verbBase, verbWithTo].filter(Boolean))];
+      }
       const isCorrect = acceptedAnswers.includes(userInput);
-
       const feedback = document.getElementById('quiz-write-feedback');
       feedback.classList.remove('hidden');
 
       if (isCorrect) {
         quizCorrectCount++;
-        feedback.className = "p-4 rounded-2xl text-center font-bold bg-teal-950/70 border border-teal-500 text-teal-100";
-        feedback.innerText = "✨ Perfeito! Excelente resposta!";
-        speak(item.en);
+        feedback.className = 'quiz-feedback-good p-4 rounded-2xl text-center text-sm font-bold';
+        feedback.innerHTML = '✨ <strong>Resposta correta!</strong><div class="text-xs font-medium mt-1 opacity-80">Muito bem. Continue assim.</div>';
       } else {
-        quizWrongItems.push({ item, chosen: document.getElementById('quiz-write-input').value || '(em branco)', expected: expectedRaw });
-        feedback.className = "p-4 rounded-2xl text-center font-bold bg-indigo-950/70 border border-indigo-500 text-indigo-100";
-        feedback.innerHTML = `❌ O correto é: <strong class="underline">${expectedRaw}</strong>`;
+        quizWrongItems.push({ item, chosen: rawUserInput || '(em branco)', expected: expectedRaw });
+        feedback.className = 'quiz-feedback-bad p-4 rounded-2xl text-center text-sm font-bold';
+        let explanation = '';
+        if (q.type === 'write_pt' && acceptedAnswers.length > 1) explanation = `<div class="quiz-error-explanation">💡 Você só precisava escrever <strong>um</strong> dos significados aceitos.</div>`;
+        else if (q.type === 'generated_choice') explanation = `<div class="quiz-error-explanation">💡 As alternativas foram montadas somente com conteúdo já cadastrado. Revise a palavra correta e tente reconhecê-la no contexto.</div>`;
+        else if (q.type === 'write_en') explanation = `<div class="quiz-error-explanation">💡 Compare sua resposta com a forma correta e observe a ordem das palavras.</div>`;
+        else if (q.type === 'transform') explanation = `<div class="quiz-error-explanation">💡 A transformação pedida exige manter a frase e mudar apenas sua estrutura.</div>`;
+        else if (q.type === 'dictation_blind') explanation = `<div class="quiz-error-explanation">💡 Ouça novamente e observe a grafia palavra por palavra.</div>`;
+        feedback.innerHTML = `<div>❌ <strong>Vamos aprender com o erro.</strong></div><div class="mt-2 text-xs font-medium">Sua resposta: <span class="text-white">${rawUserInput || '(em branco)'}</span></div><div class="mt-1 text-xs font-medium">Resposta correta: <strong class="text-white underline">${expectedRaw}</strong></div>${explanation}`;
       }
-
-      setTimeout(nextQuestion, 2000);
+      setTimeout(nextQuestion, 3000);
     }
 
     window.skipAudioQuestion = function() {
@@ -2069,52 +2150,31 @@ body.theme-light .confirm-card{background:#fff;border-color:#e2e8f0;box-shadow:0
     async function finishQuizSession() {
       document.getElementById('view-quiz-game').classList.add('hidden');
       document.getElementById('view-quiz-results').classList.remove('hidden');
-
       const total = quizQueue.length;
-      const accuracy = Math.round((quizCorrectCount / total) * 100);
-
+      const accuracy = total ? Math.round((quizCorrectCount / total) * 100) : 0;
       document.getElementById('res-accuracy').innerText = `${accuracy}%`;
       document.getElementById('res-correct').innerText = quizCorrectCount;
       document.getElementById('res-wrong').innerText = quizWrongItems.length;
-
       const lessonVal = document.getElementById('practice-select-lesson').value;
+      const selectedLesson = lessonVal === 'all' ? 'Todas as Lessons do bloco' : (lessons.find(l => l.id === parseInt(lessonVal,10))?.en || 'Lesson selecionada');
+      document.getElementById('quiz-feedback-subtitle').innerText = `${selectedLesson} • ${total} questões concluídas`;
+
       const now = new Date();
       const dateStr = `${now.toLocaleDateString('pt-BR')} ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
-
-      const historyEntry = {
-        id: Date.now().toString(),
-        date: dateStr,
-        block: currentPracticeBlock,
-        lesson: lessonVal,
-        total: total,
-        correct: quizCorrectCount,
-        accuracy: accuracy
-      };
-
-      try {
-        await saveHistoryEntry(historyEntry);
-        historyDB.unshift(historyEntry);
-      } catch (error) {
-        console.error('Erro ao salvar histórico no Firebase:', error);
-        alert('O treino terminou, mas não foi possível salvar o histórico no Firebase.');
-      }
+      const historyEntry = { id: Date.now().toString(), date: dateStr, block: currentPracticeBlock, lesson: lessonVal, total, correct: quizCorrectCount, accuracy };
+      try { await saveHistoryEntry(historyEntry); historyDB.unshift(historyEntry); }
+      catch (error) { console.error('Erro ao salvar histórico no Firebase:', error); alert('O treino terminou, mas não foi possível salvar o histórico no Firebase.'); }
 
       const wrongsWrapper = document.getElementById('quiz-wrongs-wrapper');
       if (quizWrongItems.length > 0) {
         wrongsWrapper.classList.remove('hidden');
         document.getElementById('quiz-wrongs-list').innerHTML = quizWrongItems.map(w => `
-          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
-            <div>
-              <p class="font-bold text-white">${w.item.en}</p>
-              <p class="text-teal-300 font-medium">Correto: ${w.expected}</p>
-            </div>
-            <span class="text-slate-300 line-through text-[11px]">Você: ${w.chosen}</span>
-          </div>
-        `).join('');
-      } else {
-        wrongsWrapper.classList.add('hidden');
-      }
-
+          <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800 text-xs space-y-1.5">
+            <p class="font-bold text-white">${w.item.en}</p>
+            <p class="text-slate-400">Sua resposta: <span class="text-rose-300">${w.chosen}</span></p>
+            <p class="text-teal-300 font-medium">Resposta correta: ${w.expected}</p>
+          </div>`).join('');
+      } else wrongsWrapper.classList.add('hidden');
       if (window.lucide) lucide.createIcons();
     }
 
