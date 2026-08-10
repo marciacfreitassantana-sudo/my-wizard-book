@@ -119,6 +119,8 @@ section.grid > div,
 #container-words > div,
 #container-phrases > div,
 #container-grammar > div,
+#container-real-life > div,
+#container-avulsas > div,
 #search-results-container > div{
   transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease;
 }
@@ -126,6 +128,8 @@ section.grid > div,
 #container-words > div:hover,
 #container-phrases > div:hover,
 #container-grammar > div:hover,
+#container-real-life > div:hover,
+#container-avulsas > div:hover,
 #search-results-container > div:hover{
   border-color:rgba(139,92,246,.24)!important;
   box-shadow:0 10px 28px rgba(139,92,246,.06);
@@ -168,7 +172,10 @@ section.grid > div,
 
 /* Modals */
 #modal-practice-select > div,
-#modal-add > div{
+#modal-add > div,
+#modal-add-block > div,
+#modal-add-lesson > div,
+#modal-add-avulsa > div{
   background:
     radial-gradient(circle at 85% 0%,rgba(139,92,246,.07),transparent 30%),
     linear-gradient(145deg,#0d1420,#070a0f)!important;
@@ -194,6 +201,30 @@ button{
     transition-duration:.01ms!important;
     animation-duration:.01ms!important;
   }
+}
+
+/* Add button style */
+.add-btn {
+  background: rgba(59,130,246,0.08);
+  border: 1px dashed rgba(59,130,246,0.25);
+  color: var(--mw-blue-light);
+  transition: all 0.2s ease;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.add-btn:hover {
+  background: rgba(59,130,246,0.16);
+  border-color: var(--mw-blue);
+  transform: scale(1.02);
+}
+.add-btn svg {
+  width: 14px;
+  height: 14px;
 }
 </style>
 
@@ -323,9 +354,14 @@ button{
 
       <!-- SEÇÃO BLOCOS -->
       <section class="space-y-4">
-        <div>
-          <h2 class="text-2xl font-black text-white">Meus Blocos de Estudo</h2>
-          <p class="text-slate-400 text-sm">Selecione um bloco para estudar ou acompanhe seu progresso.</p>
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-black text-white">Meus Blocos de Estudo</h2>
+            <p class="text-slate-400 text-sm">Selecione um bloco para estudar ou acompanhe seu progresso.</p>
+          </div>
+          <button onclick="openAddBlockModal()" class="add-btn">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Adicionar Bloco
+          </button>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="blocks-container"></div>
       </section>
@@ -343,39 +379,85 @@ button{
     <!-- LESSON CONTENT -->
     <section id="view-lesson-content" class="hidden space-y-6">
       <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 flex-wrap">
           <button onclick="showBlockGrid()" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition border border-slate-700 flex items-center gap-2 text-xs font-bold">
             <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar
           </button>
           <div>
             <h2 class="text-xl font-black text-white" id="selected-block-title">Bloco 1</h2>
-            <p class="text-xs text-slate-400">Conteúdo do módulo</p>
+            <p class="text-xs text-slate-400" id="selected-block-subtitle"></p>
           </div>
         </div>
         <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0" id="lesson-tabs"></div>
       </div>
 
       <div class="space-y-6">
+        <!-- VERBS -->
         <div class="bg-slate-900 border border-blue-800/50 rounded-2xl overflow-hidden shadow-xl">
-          <div class="bg-blue-700 px-4 py-2.5"><h3 class="font-black text-sm tracking-wider uppercase text-white">VERBS</h3></div>
+          <div class="bg-blue-700 px-4 py-2.5 flex items-center justify-between">
+            <h3 class="font-black text-sm tracking-wider uppercase text-white">VERBS</h3>
+            <button onclick="openAddItemModal('verbs')" class="add-btn text-white border-white/20 hover:border-white/40">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Adicionar
+            </button>
+          </div>
           <div class="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="container-verbs"></div>
         </div>
 
+        <!-- NEW WORDS & AVULSAS & PHRASES -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl flex flex-col">
-            <div class="bg-blue-600 px-4 py-2.5"><h3 class="font-black text-sm tracking-wider uppercase text-white">NEW WORDS</h3></div>
+            <div class="bg-blue-600 px-4 py-2.5 flex items-center justify-between">
+              <h3 class="font-black text-sm tracking-wider uppercase text-white">NEW WORDS</h3>
+              <button onclick="openAddItemModal('words')" class="add-btn text-white border-white/20 hover:border-white/40">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Adicionar
+              </button>
+            </div>
             <div class="p-4 space-y-2.5 flex-1 divide-y divide-slate-800/60" id="container-words"></div>
           </div>
-          <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl space-y-4 p-4">
-            <div>
-              <div class="bg-indigo-700 px-4 py-2 rounded-xl mb-3"><h3 class="font-black text-sm uppercase text-white">USEFUL PHRASES</h3></div>
-              <div class="space-y-2" id="container-phrases"></div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl flex flex-col">
+            <div class="bg-indigo-700 px-4 py-2.5 flex items-center justify-between">
+              <h3 class="font-black text-sm tracking-wider uppercase text-white">USEFUL PHRASES</h3>
+              <button onclick="openAddItemModal('phrases')" class="add-btn text-white border-white/20 hover:border-white/40">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Adicionar
+              </button>
             </div>
-            <div>
-              <div class="bg-slate-800 border border-slate-700 px-4 py-2 rounded-xl mb-3"><h3 class="font-black text-xs uppercase text-slate-300">REAL LIFE & GRAMMAR</h3></div>
-              <div class="space-y-2" id="container-grammar"></div>
-            </div>
+            <div class="p-4 space-y-2" id="container-phrases"></div>
           </div>
+        </div>
+
+        <!-- REAL LIFE & GRAMMAR -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+            <div class="bg-teal-700 px-4 py-2.5 flex items-center justify-between">
+              <h3 class="font-black text-sm tracking-wider uppercase text-white">REAL LIFE</h3>
+              <button onclick="openAddItemModal('real_life')" class="add-btn text-white border-white/20 hover:border-white/40">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Adicionar
+              </button>
+            </div>
+            <div class="p-4 space-y-2" id="container-real-life"></div>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+            <div class="bg-purple-700 px-4 py-2.5 flex items-center justify-between">
+              <h3 class="font-black text-sm tracking-wider uppercase text-white">GRAMMAR</h3>
+              <button onclick="openAddItemModal('grammar')" class="add-btn text-white border-white/20 hover:border-white/40">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Adicionar
+              </button>
+            </div>
+            <div class="p-4 space-y-2" id="container-grammar"></div>
+          </div>
+        </div>
+
+        <!-- NEW WORDS AVULSAS -->
+        <div class="bg-slate-900 border border-amber-800/50 rounded-2xl overflow-hidden shadow-xl">
+          <div class="bg-amber-700 px-4 py-2.5 flex items-center justify-between">
+            <h3 class="font-black text-sm tracking-wider uppercase text-white">NEW WORDS AVULSAS</h3>
+            <button onclick="openAddAvulsaModal()" class="add-btn text-white border-white/20 hover:border-white/40">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Adicionar
+            </button>
+          </div>
+          <div class="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="container-avulsas"></div>
         </div>
       </div>
     </section>
@@ -456,6 +538,7 @@ button{
   </main>
 
   <!-- MODAIS -->
+  <!-- Modal de Prática -->
   <div id="modal-practice-select" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
@@ -476,6 +559,7 @@ button{
     </div>
   </div>
 
+  <!-- Modal de Adicionar Item -->
   <div id="modal-add" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
@@ -484,15 +568,13 @@ button{
       </div>
       <form id="form-add" class="space-y-3">
         <input type="hidden" id="input-edit-id" value="" />
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-slate-400 mb-1">Bloco</label>
-            <input type="number" id="input-block" value="1" min="1" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white" required />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-400 mb-1">Lesson</label>
-            <input type="number" id="input-lesson" value="1" min="1" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white" required />
-          </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-400 mb-1">Bloco</label>
+          <select id="input-block" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white outline-none"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-400 mb-1">Lesson</label>
+          <select id="input-lesson" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white outline-none"></select>
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-400 mb-1">Categoria</label>
@@ -500,7 +582,8 @@ button{
             <option value="verbs">Verbs</option>
             <option value="words">New Words</option>
             <option value="phrases">Useful Phrases</option>
-            <option value="grammar">Grammar / Real Life</option>
+            <option value="real_life">Real Life</option>
+            <option value="grammar">Grammar</option>
           </select>
         </div>
         <div>
@@ -518,6 +601,87 @@ button{
         <div class="flex gap-2 pt-2">
           <button type="button" onclick="closeModal()" class="w-1/2 py-3 bg-slate-800 text-slate-300 font-bold text-sm rounded-xl">Cancelar</button>
           <button type="submit" class="w-1/2 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-xl">Salvar Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de Adicionar Bloco -->
+  <div id="modal-add-block" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-lg text-white flex items-center gap-2"><i data-lucide="book-open" class="w-5 h-5 text-blue-400"></i> Adicionar Bloco</h3>
+        <button onclick="closeAddBlockModal()" class="text-slate-500 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="form-add-block" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-400 mb-1">Nome do Bloco em Inglês</label>
+          <input type="text" id="input-block-en" placeholder="Ex: Daily Life" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white" required />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-400 mb-1">Nome do Bloco em Português</label>
+          <input type="text" id="input-block-pt" placeholder="Ex: Vida Cotidiana" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white" required />
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeAddBlockModal()" class="w-1/2 py-3 bg-slate-800 text-slate-300 font-bold text-sm rounded-xl">Cancelar</button>
+          <button type="submit" class="w-1/2 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-xl">Salvar Bloco</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de Adicionar Lesson -->
+  <div id="modal-add-lesson" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-lg text-white flex items-center gap-2"><i data-lucide="layers" class="w-5 h-5 text-indigo-400"></i> Adicionar Lesson</h3>
+        <button onclick="closeAddLessonModal()" class="text-slate-500 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="form-add-lesson" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-400 mb-1">Bloco</label>
+          <select id="input-lesson-block" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white outline-none"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-400 mb-1">Nome da Lesson em Inglês</label>
+          <input type="text" id="input-lesson-en" placeholder="Ex: At Home" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white" required />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-400 mb-1">Nome da Lesson em Português</label>
+          <input type="text" id="input-lesson-pt" placeholder="Ex: Em Casa" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white" required />
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeAddLessonModal()" class="w-1/2 py-3 bg-slate-800 text-slate-300 font-bold text-sm rounded-xl">Cancelar</button>
+          <button type="submit" class="w-1/2 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-xl">Salvar Lesson</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de Adicionar New Word Avulsa -->
+  <div id="modal-add-avulsa" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-lg text-white flex items-center gap-2"><i data-lucide="file-text" class="w-5 h-5 text-amber-400"></i> Adicionar New Word Avulsa</h3>
+        <button onclick="closeAddAvulsaModal()" class="text-slate-500 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="form-add-avulsa" class="space-y-3">
+        <input type="hidden" id="input-avulsa-edit-id" value="" />
+        <div>
+          <label class="block text-xs font-bold text-slate-400 mb-1">Palavra em Inglês</label>
+          <input type="text" id="input-avulsa-en" placeholder="Ex: although" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white" required />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-400 mb-1">Significado em Português</label>
+          <input type="text" id="input-avulsa-pt" placeholder="Ex: embora" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-sm text-white" required />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-amber-300 mb-1">Pronúncia <span class="text-slate-500 font-normal">(Opcional)</span></label>
+          <input type="text" id="input-avulsa-speech" placeholder="Ex: ól-dôu" class="w-full bg-slate-800 border border-amber-500/40 rounded-xl p-3 text-sm text-white" />
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeAddAvulsaModal()" class="w-1/2 py-3 bg-slate-800 text-slate-300 font-bold text-sm rounded-xl">Cancelar</button>
+          <button type="submit" class="w-1/2 py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold text-sm rounded-xl">Salvar Palavra</button>
         </div>
       </form>
     </div>
@@ -542,6 +706,9 @@ button{
 
     // Variáveis globais do app
     let db = [];
+    let blocks = [];
+    let lessons = [];
+    let avulsas = [];
     let historyDB = JSON.parse(localStorage.getItem('wizard_app_history')) || [];
     
     let currentBlock = 1;
@@ -553,6 +720,50 @@ button{
     let quizWrongItems = [];
     let currentPracticeBlock = 1;
 
+    // Load blocks and lessons from localStorage
+    function loadBlocksAndLessons() {
+      const storedBlocks = localStorage.getItem('wizard_blocks');
+      if (storedBlocks) {
+        blocks = JSON.parse(storedBlocks);
+      } else {
+        // Initialize with default block
+        blocks = [{ id: 1, en: 'Default Block', pt: 'Bloco Padrão' }];
+        saveBlocksAndLessons();
+      }
+
+      const storedLessons = localStorage.getItem('wizard_lessons');
+      if (storedLessons) {
+        lessons = JSON.parse(storedLessons);
+      } else {
+        // Initialize with default lessons
+        lessons = [
+          { id: 1, blockId: 1, en: 'Lesson 1', pt: 'Lição 1' },
+          { id: 2, blockId: 1, en: 'Lesson 2', pt: 'Lição 2' }
+        ];
+        saveBlocksAndLessons();
+      }
+    }
+
+    function saveBlocksAndLessons() {
+      localStorage.setItem('wizard_blocks', JSON.stringify(blocks));
+      localStorage.setItem('wizard_lessons', JSON.stringify(lessons));
+    }
+
+    // Load avulsas from localStorage
+    function loadAvulsas() {
+      const stored = localStorage.getItem('wizard_avulsas');
+      if (stored) {
+        avulsas = JSON.parse(stored);
+      } else {
+        avulsas = [];
+        saveAvulsas();
+      }
+    }
+
+    function saveAvulsas() {
+      localStorage.setItem('wizard_avulsas', JSON.stringify(avulsas));
+    }
+
     async function loadDataFromFirebase() {
       const statusText = document.getElementById('stat-cloud-status');
       statusText.innerText = "Sincronizando com o Firebase...";
@@ -562,6 +773,9 @@ button{
         querySnapshot.forEach((documento) => {
           db.push({ id: documento.id, ...documento.data() });
         });
+
+        // Migrate old grammar items that might have category 'grammar' but need separation
+        // We'll keep them in 'grammar' and 'real_life' will be separate
 
         // Compatibilidade com itens antigos: itens que ainda não possuem
         // order/createdAt recebem uma ordem temporária baseada na sequência
@@ -588,6 +802,8 @@ button{
         });
 
         statusText.innerText = "Conectado ao Firebase";
+        loadBlocksAndLessons();
+        loadAvulsas();
         renderBlocksGrid();
       } catch (error) {
         console.error("Erro ao carregar do Firestore: ", error);
@@ -656,7 +872,7 @@ button{
     window.goToLocation = function(b, l) { clearSearch(); currentBlock = b; currentLesson = l; openBlock(b); }
 
     function renderDashboardStats() {
-      document.getElementById('stat-total-items').innerText = db.length;
+      document.getElementById('stat-total-items').innerText = db.length + avulsas.length;
       document.getElementById('stat-total-sessions').innerText = historyDB.length;
 
       if (historyDB.length === 0) {
@@ -707,36 +923,48 @@ button{
       renderHistory();
 
       const container = document.getElementById('blocks-container');
-      const blocks = [...new Set(db.map(i => i.block))].sort((a, b) => a - b);
-
+      
       if (blocks.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-500 col-span-full">Nenhum bloco cadastrado no Firebase.</p>`;
+        container.innerHTML = `<p class="text-xs text-slate-500 col-span-full">Nenhum bloco cadastrado. Clique em "Adicionar Bloco" para começar!</p>`;
         return;
       }
 
-      container.innerHTML = blocks.map(blockNum => {
-        const total = db.filter(i => i.block === blockNum).length;
+      container.innerHTML = blocks.map(block => {
+        const total = db.filter(i => i.block === block.id).length + avulsas.length;
         
-        const blockHistory = historyDB.filter(h => h.block === blockNum);
+        const blockHistory = historyDB.filter(h => h.block === block.id);
         let blockAccuracy = 0;
         if (blockHistory.length > 0) {
           const sum = blockHistory.reduce((acc, curr) => acc + curr.accuracy, 0);
           blockAccuracy = Math.round(sum / blockHistory.length);
         }
 
+        const hasLessons = lessons.some(l => l.blockId === block.id);
+        const lessonCount = lessons.filter(l => l.blockId === block.id).length;
+
         return `
-          <div onclick="openBlock(${blockNum})" class="bg-slate-900 border border-slate-800 hover:border-blue-500 p-5 rounded-2xl cursor-pointer transition space-y-4 group">
+          <div onclick="openBlock(${block.id})" class="bg-slate-900 border border-slate-800 hover:border-blue-500 p-5 rounded-2xl cursor-pointer transition space-y-4 group relative">
             <div class="flex items-center justify-between">
               <span class="text-[10px] font-bold uppercase text-red-400 bg-red-950/60 px-2 py-0.5 rounded border border-red-800/40">Módulo</span>
               <span class="text-[10px] font-bold text-teal-300 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">${blockAccuracy}% Dominado</span>
             </div>
             <div>
-              <h3 class="text-xl font-black text-white group-hover:text-blue-300">Bloco ${blockNum}</h3>
-              <p class="text-xs text-slate-400 font-medium">${total} itens</p>
+              <h3 class="text-xl font-black text-white group-hover:text-blue-300">${block.en}</h3>
+              <p class="text-xs text-slate-400 font-medium italic">${block.pt}</p>
+              <p class="text-[10px] text-slate-500 mt-1">${total} itens • ${lessonCount} lessons</p>
             </div>
             
             <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
               <div class="bg-gradient-to-r from-blue-500 via-indigo-500 to-teal-400 h-1.5 rounded-full" style="width: ${blockAccuracy}%"></div>
+            </div>
+
+            <div class="absolute top-3 right-3 flex gap-1">
+              <button onclick="event.stopPropagation(); editBlock(${block.id})" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-500 hover:text-amber-300 transition" title="Editar Bloco">
+                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="event.stopPropagation(); deleteBlock(${block.id})" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-500 hover:text-rose-400 transition" title="Excluir Bloco">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
             </div>
           </div>
         `;
@@ -755,10 +983,18 @@ button{
 
     window.openBlock = function(blockId) {
       currentBlock = blockId;
-      const available = [...new Set(db.filter(i => i.block === blockId).map(i => i.lesson))].sort((a,b) => a - b);
-      currentLesson = available.length > 0 ? available[0] : 1;
+      const block = blocks.find(b => b.id === blockId);
+      const blockLessons = lessons.filter(l => l.blockId === blockId);
       
-      document.getElementById('selected-block-title').innerText = `Bloco ${blockId}`;
+      document.getElementById('selected-block-title').innerText = block ? block.en : `Bloco ${blockId}`;
+      document.getElementById('selected-block-subtitle').innerText = block ? block.pt : '';
+      
+      if (blockLessons.length > 0) {
+        currentLesson = blockLessons[0].id;
+      } else {
+        currentLesson = 1;
+      }
+      
       document.getElementById('view-blocks-grid').classList.add('hidden');
       document.getElementById('view-lesson-content').classList.remove('hidden');
 
@@ -768,17 +1004,41 @@ button{
 
     function renderLessonTabs() {
       const container = document.getElementById('lesson-tabs');
-      let lessons = [...new Set(db.filter(i => i.block === currentBlock).map(i => i.lesson))].sort((a,b) => a - b);
-
-      container.innerHTML = lessons.map(l => `
-        <button onclick="selectLesson(${l})" class="px-3.5 py-1.5 rounded-xl font-black text-xs transition ${currentLesson === l ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'bg-slate-800 text-slate-400'}">
-          Lesson ${l}
+      const blockLessons = lessons.filter(l => l.blockId === currentBlock);
+      
+      // Check if there are lessons, if not show add button
+      let html = '';
+      
+      if (blockLessons.length === 0) {
+        html = `<span class="text-xs text-slate-400">Nenhuma lesson ainda.</span>`;
+      } else {
+        html = blockLessons.map(l => `
+          <button onclick="selectLesson(${l.id})" class="px-3.5 py-1.5 rounded-xl font-black text-xs transition ${currentLesson === l.id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'} group relative">
+            ${l.en}
+            <div class="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition">
+              <button onclick="event.stopPropagation(); editLesson(${l.id})" class="p-0.5 text-amber-300 hover:text-amber-200" title="Editar Lesson">
+                <i data-lucide="pencil" class="w-2.5 h-2.5"></i>
+              </button>
+            </div>
+          </button>
+        `).join('');
+      }
+      
+      html += `
+        <button onclick="openAddLessonModal()" class="px-2.5 py-1 rounded-xl text-xs font-bold text-blue-400 hover:text-blue-300 transition border border-blue-400/30 hover:border-blue-400/60 flex items-center gap-1">
+          <i data-lucide="plus" class="w-3 h-3"></i> Adicionar
         </button>
-      `).join('');
+      `;
+      
+      container.innerHTML = html;
+      if (window.lucide) lucide.createIcons();
     }
 
-    window.selectLesson = function(l) { currentLesson = l; renderLessonTabs(); renderLessonContent(); }
-
+    window.selectLesson = function(lessonId) { 
+      currentLesson = lessonId; 
+      renderLessonTabs(); 
+      renderLessonContent(); 
+    }
 
     // Retorna os itens da mesma categoria, bloco e lesson na ordem definida pelo usuário.
     function getOrderedSiblingItems(item) {
@@ -828,7 +1088,6 @@ button{
           updateDoc(doc(dbCloud, "wizard_items", target.id), { order: target.order })
         ]);
 
-        // Atualiza somente a apresentação; nenhuma outra funcionalidade é alterada.
         renderLessonContent();
       } catch (error) {
         console.error("Erro ao mover item: ", error);
@@ -892,10 +1151,40 @@ button{
           : `<p class="text-xs text-slate-500">${emptyText}</p>`;
       };
 
+      // Render avulsas
+      const renderAvulsas = () => {
+        const sortedAvulsas = [...avulsas].sort((a, b) => a.order - b.order);
+        return sortedAvulsas.length
+          ? sortedAvulsas.map((item, index) => {
+              const speechFormatted = item.speech ? ` <span class="text-amber-400 font-medium">(${item.speech})</span>` : '';
+              return `
+                <div class="bg-slate-950 border border-slate-800 p-3.5 rounded-xl flex items-center justify-between group">
+                  <p class="font-bold text-white text-sm">${item.en} <span class="text-slate-500 font-normal">|</span> <span class="italic font-normal text-slate-300">${item.pt}</span>${speechFormatted}</p>
+                  <div class="flex items-center gap-1.5 shrink-0 ml-2">
+                    <div class="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5 mr-1 text-slate-500">
+                      <button onclick="editAvulsa('${item.id}')" title="Editar" class="p-1 hover:text-amber-400">
+                        <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                      </button>
+                      <button onclick="deleteAvulsa('${item.id}')" title="Excluir" class="p-1 hover:text-rose-400">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                      </button>
+                    </div>
+                    <button onclick="speak('${item.en}')" class="p-1.5 text-sky-400 hover:bg-slate-800 rounded-lg" title="Ouvir">
+                      <i data-lucide="volume-2" class="w-4 h-4"></i>
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('')
+          : `<p class="text-xs text-slate-500">Nenhuma palavra avulsa.</p>`;
+      };
+
       document.getElementById('container-verbs').innerHTML = renderCategory('verbs', 'Nenhum verbo.');
       document.getElementById('container-words').innerHTML = renderCategory('words', 'Nenhuma palavra.');
       document.getElementById('container-phrases').innerHTML = renderCategory('phrases', 'Nenhuma frase.');
-      document.getElementById('container-grammar').innerHTML = renderCategory('grammar', 'Nenhuma gramática.');
+      document.getElementById('container-real-life').innerHTML = renderCategory('real_life', 'Nenhum conteúdo de Real Life.');
+      document.getElementById('container-grammar').innerHTML = renderCategory('grammar', 'Nenhum conteúdo de Grammar.');
+      document.getElementById('container-avulsas').innerHTML = renderAvulsas();
 
       if (window.lucide) lucide.createIcons();
     }
@@ -904,8 +1193,13 @@ button{
       const item = db.find(i => i.id === id);
       if(!item) return;
       document.getElementById('input-edit-id').value = item.id;
-      document.getElementById('input-block').value = item.block;
-      document.getElementById('input-lesson').value = item.lesson;
+      
+      // Populate block dropdown
+      populateBlockDropdown('input-block', item.block);
+      
+      // Populate lesson dropdown
+      populateLessonDropdown('input-lesson', item.block, item.lesson);
+      
       document.getElementById('input-category').value = item.category;
       document.getElementById('input-en').value = item.en;
       document.getElementById('input-speech').value = item.speech || '';
@@ -932,23 +1226,293 @@ button{
       }
     }
 
-    window.openPracticeModal = function() {
-      const blocks = [...new Set(db.map(i => i.block))].sort((a,b) => a - b);
-      if(blocks.length === 0) return alert('Cadastre ao menos um item!');
+    // Block management functions
+    window.openAddBlockModal = function() {
+      document.getElementById('form-add-block').reset();
+      document.getElementById('modal-add-block').classList.remove('hidden');
+    }
 
-      document.getElementById('practice-select-block').innerHTML = blocks.map(b => `<option value="${b}">Bloco ${b}</option>`).join('');
+    window.closeAddBlockModal = function() {
+      document.getElementById('modal-add-block').classList.add('hidden');
+    }
+
+    window.editBlock = function(blockId) {
+      const block = blocks.find(b => b.id === blockId);
+      if (!block) return;
+      document.getElementById('input-block-en').value = block.en;
+      document.getElementById('input-block-pt').value = block.pt;
+      document.getElementById('form-add-block').dataset.editId = blockId;
+      document.getElementById('modal-add-block').classList.remove('hidden');
+    }
+
+    window.deleteBlock = function(blockId) {
+      if (!confirm(`Deseja realmente excluir o bloco "${blocks.find(b => b.id === blockId)?.en || blockId}" e todas as suas lessons?`)) return;
+      
+      // Delete all lessons of this block
+      lessons = lessons.filter(l => l.blockId !== blockId);
+      // Delete all items of this block from Firebase
+      const itemsToDelete = db.filter(i => i.block === blockId);
+      itemsToDelete.forEach(async item => {
+        try {
+          await deleteDoc(doc(dbCloud, "wizard_items", item.id));
+        } catch (e) { console.error("Error deleting item:", e); }
+      });
+      
+      blocks = blocks.filter(b => b.id !== blockId);
+      saveBlocksAndLessons();
+      
+      // Reload data
+      loadDataFromFirebase();
+    }
+
+    // Lesson management functions
+    window.openAddLessonModal = function() {
+      document.getElementById('form-add-lesson').reset();
+      populateBlockDropdown('input-lesson-block', currentBlock);
+      document.getElementById('modal-add-lesson').classList.remove('hidden');
+    }
+
+    window.closeAddLessonModal = function() {
+      document.getElementById('modal-add-lesson').classList.add('hidden');
+    }
+
+    window.editLesson = function(lessonId) {
+      const lesson = lessons.find(l => l.id === lessonId);
+      if (!lesson) return;
+      document.getElementById('input-lesson-en').value = lesson.en;
+      document.getElementById('input-lesson-pt').value = lesson.pt;
+      populateBlockDropdown('input-lesson-block', lesson.blockId);
+      document.getElementById('form-add-lesson').dataset.editId = lessonId;
+      document.getElementById('modal-add-lesson').classList.remove('hidden');
+    }
+
+    // Avulsa management functions
+    window.openAddAvulsaModal = function() {
+      document.getElementById('form-add-avulsa').reset();
+      document.getElementById('input-avulsa-edit-id').value = '';
+      document.getElementById('modal-add-avulsa').classList.remove('hidden');
+    }
+
+    window.closeAddAvulsaModal = function() {
+      document.getElementById('modal-add-avulsa').classList.add('hidden');
+    }
+
+    window.editAvulsa = function(id) {
+      const item = avulsas.find(a => a.id === id);
+      if (!item) return;
+      document.getElementById('input-avulsa-edit-id').value = item.id;
+      document.getElementById('input-avulsa-en').value = item.en;
+      document.getElementById('input-avulsa-pt').value = item.pt;
+      document.getElementById('input-avulsa-speech').value = item.speech || '';
+      document.getElementById('modal-add-avulsa').classList.remove('hidden');
+    }
+
+    window.deleteAvulsa = function(id) {
+      if (!confirm('Deseja realmente excluir esta palavra avulsa?')) return;
+      avulsas = avulsas.filter(a => a.id !== id);
+      saveAvulsas();
+      renderLessonContent();
+    }
+
+    // Populate dropdowns
+    function populateBlockDropdown(dropdownId, selectedValue) {
+      const dropdown = document.getElementById(dropdownId);
+      dropdown.innerHTML = blocks.map(b => 
+        `<option value="${b.id}" ${b.id === selectedValue ? 'selected' : ''}>${b.en} (${b.pt})</option>`
+      ).join('');
+    }
+
+    function populateLessonDropdown(dropdownId, blockId, selectedValue) {
+      const dropdown = document.getElementById(dropdownId);
+      const blockLessons = lessons.filter(l => l.blockId === blockId);
+      dropdown.innerHTML = blockLessons.map(l => 
+        `<option value="${l.id}" ${l.id === selectedValue ? 'selected' : ''}>${l.en} (${l.pt})</option>`
+      ).join('');
+      if (blockLessons.length === 0) {
+        dropdown.innerHTML = `<option value="">Nenhuma lesson disponível</option>`;
+      }
+    }
+
+    window.openPracticeModal = function() {
+      if (blocks.length === 0) return alert('Crie pelo menos um bloco primeiro!');
+      
+      document.getElementById('practice-select-block').innerHTML = blocks.map(b => 
+        `<option value="${b.id}">${b.en} (${b.pt})</option>`
+      ).join('');
       updatePracticeLessonsDropdown();
       document.getElementById('modal-practice-select').classList.remove('hidden');
     }
 
-    window.closePracticeModal = function() { document.getElementById('modal-practice-select').classList.add('hidden'); }
+    window.closePracticeModal = function() { 
+      document.getElementById('modal-practice-select').classList.add('hidden'); 
+    }
 
     window.updatePracticeLessonsDropdown = function() {
       const b = parseInt(document.getElementById('practice-select-block').value, 10);
-      const lessons = [...new Set(db.filter(i => i.block === b).map(i => i.lesson))].sort((a,b) => a - b);
-      document.getElementById('practice-select-lesson').innerHTML = `<option value="all">Todas as Lições</option>` + lessons.map(l => `<option value="${l}">Lesson ${l}</option>`).join('');
+      const blockLessons = lessons.filter(l => l.blockId === b);
+      const dropdown = document.getElementById('practice-select-lesson');
+      dropdown.innerHTML = `<option value="all">Todas as Lições</option>` + 
+        blockLessons.map(l => `<option value="${l.id}">${l.en}</option>`).join('');
     }
 
+    // Modal functions
+    window.openModal = function() { 
+      document.getElementById('modal-add').classList.remove('hidden'); 
+    }
+    
+    window.closeModal = function() { 
+      document.getElementById('modal-add').classList.add('hidden'); 
+      document.getElementById('form-add').reset(); 
+    }
+
+    window.openAddItemModal = function(category) {
+      document.getElementById('input-edit-id').value = '';
+      document.getElementById('modal-title').innerText = 'Adicionar Novo Item';
+      document.getElementById('input-category').value = category;
+      
+      populateBlockDropdown('input-block', currentBlock);
+      populateLessonDropdown('input-lesson', currentBlock, currentLesson);
+      
+      document.getElementById('modal-add').classList.remove('hidden');
+    }
+
+    // Form submissions
+    document.getElementById('form-add').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('input-edit-id').value;
+      const block = parseInt(document.getElementById('input-block').value, 10);
+      const lesson = parseInt(document.getElementById('input-lesson').value, 10);
+      const category = document.getElementById('input-category').value;
+      const en = document.getElementById('input-en').value.trim();
+      const speech = document.getElementById('input-speech').value.trim();
+      const pt = document.getElementById('input-pt').value.trim();
+
+      try {
+        if (id) {
+          const docRef = doc(dbCloud, "wizard_items", id);
+          await updateDoc(docRef, { block, lesson, category, en, speech, pt });
+        } else {
+          const siblingItems = db.filter(i =>
+            i.block === block &&
+            i.lesson === lesson &&
+            i.category === category
+          );
+          const maxOrder = siblingItems.reduce((max, item) => {
+            const value = Number(item.order);
+            return Number.isFinite(value) ? Math.max(max, value) : max;
+          }, 0);
+
+          await addDoc(collection(dbCloud, "wizard_items"), {
+            block, lesson, category, en, speech, pt,
+            createdAt: Date.now(),
+            order: maxOrder + 1
+          });
+        }
+
+        const previousBlock = currentBlock;
+        const previousLesson = currentLesson;
+
+        closeModal();
+        await loadDataFromFirebase();
+
+        currentBlock = previousBlock;
+        currentLesson = previousLesson;
+
+        document.getElementById('selected-block-title').innerText = blocks.find(b => b.id === previousBlock)?.en || `Bloco ${previousBlock}`;
+        document.getElementById('selected-block-subtitle').innerText = blocks.find(b => b.id === previousBlock)?.pt || '';
+        document.getElementById('view-blocks-grid').classList.add('hidden');
+        document.getElementById('view-lesson-content').classList.remove('hidden');
+
+        renderLessonTabs();
+        renderLessonContent();
+      } catch (error) {
+        console.error("Erro ao salvar no Firebase: ", error);
+        alert("Erro ao salvar os dados no banco.");
+      }
+    });
+
+    document.getElementById('form-add-block').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const en = document.getElementById('input-block-en').value.trim();
+      const pt = document.getElementById('input-block-pt').value.trim();
+      const editId = document.getElementById('form-add-block').dataset.editId;
+
+      if (editId) {
+        // Edit existing block
+        const block = blocks.find(b => b.id === parseInt(editId));
+        if (block) {
+          block.en = en;
+          block.pt = pt;
+        }
+        delete document.getElementById('form-add-block').dataset.editId;
+      } else {
+        // Create new block
+        const newId = blocks.length > 0 ? Math.max(...blocks.map(b => b.id)) + 1 : 1;
+        blocks.push({ id: newId, en, pt });
+      }
+
+      saveBlocksAndLessons();
+      closeAddBlockModal();
+      renderBlocksGrid();
+    });
+
+    document.getElementById('form-add-lesson').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const blockId = parseInt(document.getElementById('input-lesson-block').value, 10);
+      const en = document.getElementById('input-lesson-en').value.trim();
+      const pt = document.getElementById('input-lesson-pt').value.trim();
+      const editId = document.getElementById('form-add-lesson').dataset.editId;
+
+      if (editId) {
+        // Edit existing lesson
+        const lesson = lessons.find(l => l.id === parseInt(editId));
+        if (lesson) {
+          lesson.blockId = blockId;
+          lesson.en = en;
+          lesson.pt = pt;
+        }
+        delete document.getElementById('form-add-lesson').dataset.editId;
+      } else {
+        // Create new lesson
+        const blockLessons = lessons.filter(l => l.blockId === blockId);
+        const newId = lessons.length > 0 ? Math.max(...lessons.map(l => l.id)) + 1 : 1;
+        lessons.push({ id: newId, blockId, en, pt });
+      }
+
+      saveBlocksAndLessons();
+      closeAddLessonModal();
+      renderLessonTabs();
+      renderLessonContent();
+    });
+
+    document.getElementById('form-add-avulsa').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('input-avulsa-edit-id').value;
+      const en = document.getElementById('input-avulsa-en').value.trim();
+      const pt = document.getElementById('input-avulsa-pt').value.trim();
+      const speech = document.getElementById('input-avulsa-speech').value.trim();
+
+      if (id) {
+        // Edit existing avulsa
+        const item = avulsas.find(a => a.id === id);
+        if (item) {
+          item.en = en;
+          item.pt = pt;
+          item.speech = speech;
+        }
+      } else {
+        // Create new avulsa
+        const newId = Date.now().toString();
+        const maxOrder = avulsas.reduce((max, a) => Math.max(max, a.order || 0), 0);
+        avulsas.push({ id: newId, en, pt, speech, order: maxOrder + 1 });
+      }
+
+      saveAvulsas();
+      closeAddAvulsaModal();
+      renderLessonContent();
+    });
+
+    // Quiz functions
     function transformSentence(en, targetType) {
       let clean = en.trim().replace(/\.$/, '');
       if (targetType === 'negative') {
@@ -971,9 +1535,15 @@ button{
       let filtered = db.filter(i => i.block === block);
       if (lessonVal !== 'all') filtered = filtered.filter(i => i.lesson === parseInt(lessonVal, 10));
 
-      if (filtered.length === 0) return alert('Nenhum item encontrado nesta seleção.');
+      // Add avulsas to practice
+      const avulsasToPractice = [...avulsas];
+      
+      if (filtered.length === 0 && avulsasToPractice.length === 0) {
+        return alert('Nenhum item encontrado nesta seleção.');
+      }
 
       quizQueue = [];
+      
       filtered.forEach(item => {
         quizQueue.push({ item, type: 'dictation_blind' });
         quizQueue.push({ item, type: Math.random() > 0.5 ? 'write_en' : 'write_pt' });
@@ -982,6 +1552,11 @@ button{
           const transformType = Math.random() > 0.5 ? 'negative' : 'interrogative';
           quizQueue.push({ item, type: 'transform', transformType });
         }
+      });
+
+      avulsasToPractice.forEach(av => {
+        quizQueue.push({ item: { ...av, category: 'avulsa', block: block, lesson: lessonVal === 'all' ? 1 : parseInt(lessonVal, 10) }, type: 'dictation_blind' });
+        quizQueue.push({ item: { ...av, category: 'avulsa', block: block, lesson: lessonVal === 'all' ? 1 : parseInt(lessonVal, 10) }, type: Math.random() > 0.5 ? 'write_en' : 'write_pt' });
       });
 
       quizQueue = quizQueue.sort(() => 0.5 - Math.random());
@@ -1156,73 +1731,6 @@ button{
         window.speechSynthesis.speak(u);
       }
     }
-
-    window.openModal = function() { 
-      document.getElementById('input-edit-id').value = '';
-      document.getElementById('modal-title').innerText = 'Adicionar Novo Item';
-      document.getElementById('modal-add').classList.remove('hidden'); 
-    }
-    
-    window.closeModal = function() { 
-      document.getElementById('modal-add').classList.add('hidden'); 
-      document.getElementById('form-add').reset(); 
-    }
-
-    document.getElementById('form-add').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const id = document.getElementById('input-edit-id').value;
-      const block = parseInt(document.getElementById('input-block').value, 10);
-      const lesson = parseInt(document.getElementById('input-lesson').value, 10);
-      const category = document.getElementById('input-category').value;
-      const en = document.getElementById('input-en').value.trim();
-      const speech = document.getElementById('input-speech').value.trim();
-      const pt = document.getElementById('input-pt').value.trim();
-
-      try {
-        if (id) {
-          // Atualiza no Firebase
-          const docRef = doc(dbCloud, "wizard_items", id);
-          await updateDoc(docRef, { block, lesson, category, en, speech, pt });
-        } else {
-          // Adiciona novo no Firebase.
-          // createdAt mantém a ordem natural de criação; order permite reorganização manual.
-          const siblingItems = db.filter(i =>
-            i.block === block &&
-            i.lesson === lesson &&
-            i.category === category
-          );
-          const maxOrder = siblingItems.reduce((max, item) => {
-            const value = Number(item.order);
-            return Number.isFinite(value) ? Math.max(max, value) : max;
-          }, 0);
-
-          await addDoc(collection(dbCloud, "wizard_items"), {
-            block, lesson, category, en, speech, pt,
-            createdAt: Date.now(),
-            order: maxOrder + 1
-          });
-        }
-
-	const previousBlock = currentBlock;
-	const previousLesson = currentLesson;
-
-	closeModal();
-	await loadDataFromFirebase();
-
-	currentBlock = block;
-	currentLesson = previousLesson;
-
-	document.getElementById('selected-block-title').innerText = `Bloco ${block}`;
-	document.getElementById('view-blocks-grid').classList.add('hidden');
-	document.getElementById('view-lesson-content').classList.remove('hidden');
-
-	renderLessonTabs();
-	renderLessonContent();
-      } catch (error) {
-        console.error("Erro ao salvar no Firebase: ", error);
-        alert("Erro ao salvar os dados no banco.");
-      }
-    });
 
     // Iniciar dados do Firebase ao carregar a página
     document.addEventListener('DOMContentLoaded', () => {
