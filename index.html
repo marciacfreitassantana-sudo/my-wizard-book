@@ -686,7 +686,7 @@ button{
   <!-- SCRIPT FIREBASE E APLICAÇÃO -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc, getDoc, runTransaction, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBD7dbcn_CVuUKVxVrvJKrI7UhkETLqKBM",
@@ -705,8 +705,8 @@ button{
     let blocks = [];
     let lessons = [];
     let avulsas = [];
-    let historyDB = JSON.parse(localStorage.getItem('wizard_app_history')) || [];
-    
+    let historyDB = [];
+
     let currentBlock = 1;
     let currentLesson = 1;
     let quizQueue = [];
@@ -715,96 +715,291 @@ button{
     let quizCorrectCount = 0;
     let quizWrongItems = [];
     let currentPracticeBlock = 1;
+    let realtimeUnsubscribers = [];
 
-    // Load blocks and lessons from localStorage
-    function loadBlocksAndLessons() {
-      const storedBlocks = localStorage.getItem('wizard_blocks');
-      if (storedBlocks) {
-        blocks = JSON.parse(storedBlocks);
-      } else {
-        // Initialize with default block
-        blocks = [{ id: 1, en: 'Default Block', pt: 'Bloco Padrão' }];
-        saveBlocksAndLessons();
-      }
+    // Todas as informações persistentes do usuário agora ficam no Firestore.
+    // O localStorage é usado somente uma vez, durante a migração automática
+    // dos dados antigos existentes neste navegador.
+    const CLOUD_COLLECTIONS = {
+      items: 'wizard_items',
+      blocks: 'wizard_blocks',
+      lessons: 'wizard_lessons',
+      avulsas: 'wizard_avulsas',
+      history: 'wizard_history'
+    };
 
-      const storedLessons = localStorage.getItem('wizard_lessons');
-      if (storedLessons) {
-        lessons = JSON.parse(storedLessons);
-      } else {
-        // Initialize with default lessons
-        lessons = [
-          { id: 1, blockId: 1, en: 'Lesson 1' },
-          { id: 2, blockId: 1, en: 'Lesson 2' }
-        ];
-        saveBlocksAndLessons();
+    function normalizeNumber(value, fallback = 0) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    async function migrateLocalStorageToFirebase() {
+      const migrationKeys = ['wizard_blocks', 'wizard_lessons', 'wizard_avulsas', 'wizard_app_history'];
+      const hasLegacyData = migrationKeys.some(key => localStorage.getItem(key));
+      if (!hasLegacyData) return;
+
+      const statusText = document.getElementById('stat-cloud-status');
+      statusText.innerText = 'Migrando dados antigos para o Firebase...';
+
+      try {
+        // Só cria documentos que ainda não existem no Firebase.
+        // Assim, se a migração for interrompida e executada novamente,
+        // os dados não serão duplicados nem sobrescritos.
+        const storedBlocks = JSON.parse(localStorage.getItem('wizard_blocks') || 'null');
+        const storedLessons = JSON.parse(localStorage.getItem('wizard_lessons') || 'null');
+        const storedAvulsas = JSON.parse(localStorage.getItem('wizard_avulsas') || 'null');
+        const storedHistory = JSON.parse(localStorage.getItem('wizard_app_history') || 'null');
+
+        if (Array.isArray(storedBlocks)) {
+          for (const block of storedBlocks) {
+            if (block?.id == null) continue;
+            const ref = doc(dbCloud, CLOUD_COLLECTIONS.blocks, `block_${block.id}`);
+            const snap = await getDoc(ref);
+            if (!snap.exists()) {
+              await setDoc(ref, {
+                id: normalizeNumber(block.id),
+                en: block.en || '',
+                pt: block.pt || '',
+                createdAt: normalizeNumber(block.createdAt, Date.now())
+              });
+            }
+          }
+        }
+
+        if (Array.isArray(storedLessons)) {
+          for (const lesson of storedLessons) {
+            if (lesson?.id == null) continue;
+            const ref = doc(dbCloud, CLOUD_COLLECTIONS.lessons, `lesson_${lesson.id}`);
+            const snap = await getDoc(ref);
+            if (!snap.exists()) {
+              await setDoc(ref, {
+                id: normalizeNumber(lesson.id),
+                blockId: normalizeNumber(lesson.blockId),
+                en: lesson.en || '',
+                createdAt: normalizeNumber(lesson.createdAt, Date.now())
+              });
+            }
+          }
+        }
+
+        if (Array.isArray(storedAvulsas)) {
+          for (const item of storedAvulsas) {
+            if (item?.id == null) continue;
+            const ref = doc(dbCloud, CLOUD_COLLECTIONS.avulsas, `avulsa_${item.id}`);
+            const snap = await getDoc(ref);
+            if (!snap.exists()) {
+              await setDoc(ref, {
+                id: String(item.id),
+                en: item.en || '',
+                pt: item.pt || '',
+                speech: item.speech || '',
+                order: normalizeNumber(item.order, 0),
+                createdAt: normalizeNumber(item.createdAt, Date.now())
+              });
+            }
+          }
+        }
+
+        if (Array.isArray(storedHistory)) {
+          for (const entry of storedHistory) {
+            if (entry?.id == null) continue;
+            const ref = doc(dbCloud, CLOUD_COLLECTIONS.history, `history_${entry.id}`);
+            const snap = await getDoc(ref);
+            if (!snap.exists()) {
+              await setDoc(ref, {
+                id: String(entry.id),
+                date: entry.date || '',
+                block: normalizeNumber(entry.block),
+                lesson: entry.lesson ?? 'all',
+                total: normalizeNumber(entry.total),
+                correct: normalizeNumber(entry.correct),
+                accuracy: normalizeNumber(entry.accuracy)
+              });
+            }
+          }
+        }
+
+        // Só removemos os dados locais depois que toda a migração terminou.
+        migrationKeys.forEach(key => localStorage.removeItem(key));
+      } catch (error) {
+        console.error('Erro na migração do localStorage para o Firebase:', error);
+        throw error;
       }
     }
 
-    function saveBlocksAndLessons() {
-      localStorage.setItem('wizard_blocks', JSON.stringify(blocks));
-      localStorage.setItem('wizard_lessons', JSON.stringify(lessons));
-    }
+    async function ensureDefaultCloudData() {
+      const [blocksSnapshot, lessonsSnapshot] = await Promise.all([
+        getDocs(collection(dbCloud, CLOUD_COLLECTIONS.blocks)),
+        getDocs(collection(dbCloud, CLOUD_COLLECTIONS.lessons))
+      ]);
 
-    // Load avulsas from localStorage
-    function loadAvulsas() {
-      const stored = localStorage.getItem('wizard_avulsas');
-      if (stored) {
-        avulsas = JSON.parse(stored);
-      } else {
-        avulsas = [];
-        saveAvulsas();
+      if (blocksSnapshot.empty) {
+        await setDoc(doc(dbCloud, CLOUD_COLLECTIONS.blocks, 'block_1'), {
+          id: 1, en: 'Default Block', pt: 'Bloco Padrão', createdAt: Date.now()
+        });
+      }
+
+      if (lessonsSnapshot.empty) {
+        await Promise.all([
+          setDoc(doc(dbCloud, CLOUD_COLLECTIONS.lessons, 'lesson_1'), {
+            id: 1, blockId: 1, en: 'Lesson 1', createdAt: Date.now()
+          }),
+          setDoc(doc(dbCloud, CLOUD_COLLECTIONS.lessons, 'lesson_2'), {
+            id: 2, blockId: 1, en: 'Lesson 2', createdAt: Date.now()
+          })
+        ]);
       }
     }
 
-    function saveAvulsas() {
-      localStorage.setItem('wizard_avulsas', JSON.stringify(avulsas));
+    async function allocateNextNumericId(collectionName, fieldName) {
+      const counterRef = doc(dbCloud, 'wizard_meta', 'counters');
+      return runTransaction(dbCloud, async transaction => {
+        const counterSnap = await transaction.get(counterRef);
+        const current = counterSnap.exists() ? normalizeNumber(counterSnap.data()[fieldName], 0) : 0;
+        const next = current + 1;
+        transaction.set(counterRef, { [fieldName]: next }, { merge: true });
+        return next;
+      });
+    }
+
+    async function syncCountersWithExistingData() {
+      const [blockSnapshot, lessonSnapshot] = await Promise.all([
+        getDocs(collection(dbCloud, CLOUD_COLLECTIONS.blocks)),
+        getDocs(collection(dbCloud, CLOUD_COLLECTIONS.lessons))
+      ]);
+      const maxBlock = blockSnapshot.docs.reduce((max, d) => Math.max(max, normalizeNumber(d.data().id)), 0);
+      const maxLesson = lessonSnapshot.docs.reduce((max, d) => Math.max(max, normalizeNumber(d.data().id)), 0);
+      const counterRef = doc(dbCloud, 'wizard_meta', 'counters');
+      await setDoc(counterRef, { nextBlockId: maxBlock, nextLessonId: maxLesson }, { merge: true });
+    }
+
+    async function loadCloudCollections() {
+      const [itemsSnap, blocksSnap, lessonsSnap, avulsasSnap, historySnap] = await Promise.all([
+        getDocs(collection(dbCloud, CLOUD_COLLECTIONS.items)),
+        getDocs(collection(dbCloud, CLOUD_COLLECTIONS.blocks)),
+        getDocs(collection(dbCloud, CLOUD_COLLECTIONS.lessons)),
+        getDocs(collection(dbCloud, CLOUD_COLLECTIONS.avulsas)),
+        getDocs(collection(dbCloud, CLOUD_COLLECTIONS.history))
+      ]);
+
+      db = itemsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      blocks = blocksSnap.docs.map(d => ({ id: normalizeNumber(d.data().id), ...d.data() }))
+        .sort((a, b) => normalizeNumber(a.id) - normalizeNumber(b.id));
+      lessons = lessonsSnap.docs.map(d => ({ id: normalizeNumber(d.data().id), ...d.data() }))
+        .sort((a, b) => normalizeNumber(a.id) - normalizeNumber(b.id));
+      avulsas = avulsasSnap.docs.map(d => ({ id: String(d.data().id ?? d.id), ...d.data() }))
+        .sort((a, b) => normalizeNumber(a.order) - normalizeNumber(b.order));
+      historyDB = historySnap.docs.map(d => ({ id: String(d.data().id ?? d.id), ...d.data() }))
+        .sort((a, b) => String(b.id).localeCompare(String(a.id)));
+
+      normalizeItemOrdersInMemory();
+    }
+
+    function normalizeItemOrdersInMemory() {
+      const groups = {};
+      db.forEach(item => {
+        const key = `${item.block}|${item.lesson}|${item.category}`;
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(item);
+      });
+      Object.values(groups).forEach(group => {
+        group.sort((a, b) => {
+          const ao = Number.isFinite(Number(a.order)) ? Number(a.order) : Number.MAX_SAFE_INTEGER;
+          const bo = Number.isFinite(Number(b.order)) ? Number(b.order) : Number.MAX_SAFE_INTEGER;
+          if (ao !== bo) return ao - bo;
+          const ac = Number.isFinite(Number(a.createdAt)) ? Number(a.createdAt) : Number.MAX_SAFE_INTEGER;
+          const bc = Number.isFinite(Number(b.createdAt)) ? Number(b.createdAt) : Number.MAX_SAFE_INTEGER;
+          if (ac !== bc) return ac - bc;
+          return String(a.id).localeCompare(String(b.id));
+        });
+        group.forEach((item, index) => {
+          if (!Number.isFinite(Number(item.order))) item.order = index + 1;
+        });
+      });
+    }
+
+    function renderAllCloudData() {
+      renderBlocksGrid();
+      if (!document.getElementById('view-lesson-content').classList.contains('hidden')) {
+        renderLessonTabs();
+        renderLessonContent();
+      }
+    }
+
+    function stopRealtimeSync() {
+      realtimeUnsubscribers.forEach(unsubscribe => {
+        try { unsubscribe(); } catch (_) {}
+      });
+      realtimeUnsubscribers = [];
+    }
+
+    function startRealtimeSync() {
+      stopRealtimeSync();
+
+      const applySnapshot = (snapshot, target, mapper, sorter) => {
+        target.length = 0;
+        snapshot.docs.forEach(d => target.push(mapper(d)));
+        if (sorter) target.sort(sorter);
+        normalizeItemOrdersInMemory();
+        renderAllCloudData();
+      };
+
+      realtimeUnsubscribers.push(onSnapshot(collection(dbCloud, CLOUD_COLLECTIONS.items), snapshot => {
+        db = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        normalizeItemOrdersInMemory();
+        renderAllCloudData();
+      }));
+
+      realtimeUnsubscribers.push(onSnapshot(collection(dbCloud, CLOUD_COLLECTIONS.blocks), snapshot => {
+        blocks = snapshot.docs.map(d => ({ id: normalizeNumber(d.data().id), ...d.data() }))
+          .sort((a, b) => normalizeNumber(a.id) - normalizeNumber(b.id));
+        renderAllCloudData();
+      }));
+
+      realtimeUnsubscribers.push(onSnapshot(collection(dbCloud, CLOUD_COLLECTIONS.lessons), snapshot => {
+        lessons = snapshot.docs.map(d => ({ id: normalizeNumber(d.data().id), ...d.data() }))
+          .sort((a, b) => normalizeNumber(a.id) - normalizeNumber(b.id));
+        renderAllCloudData();
+      }));
+
+      realtimeUnsubscribers.push(onSnapshot(collection(dbCloud, CLOUD_COLLECTIONS.avulsas), snapshot => {
+        avulsas = snapshot.docs.map(d => ({ id: String(d.data().id ?? d.id), ...d.data() }))
+          .sort((a, b) => normalizeNumber(a.order) - normalizeNumber(b.order));
+        renderAllCloudData();
+      }));
+
+      realtimeUnsubscribers.push(onSnapshot(collection(dbCloud, CLOUD_COLLECTIONS.history), snapshot => {
+        historyDB = snapshot.docs.map(d => ({ id: String(d.data().id ?? d.id), ...d.data() }))
+          .sort((a, b) => String(b.id).localeCompare(String(a.id)));
+        renderAllCloudData();
+      }));
     }
 
     async function loadDataFromFirebase() {
       const statusText = document.getElementById('stat-cloud-status');
-      statusText.innerText = "Sincronizando com o Firebase...";
+      statusText.innerText = 'Sincronizando com o Firebase...';
       try {
-        const querySnapshot = await getDocs(collection(dbCloud, "wizard_items"));
-        db = [];
-        querySnapshot.forEach((documento) => {
-          db.push({ id: documento.id, ...documento.data() });
-        });
-
-        // Compatibilidade com itens antigos: itens que ainda não possuem
-        // order/createdAt recebem uma ordem temporária baseada na sequência
-        // em que foram carregados. Novos itens passam a usar createdAt + order.
-        const groups = {};
-        db.forEach(item => {
-          const key = `${item.block}|${item.lesson}|${item.category}`;
-          if (!groups[key]) groups[key] = [];
-          groups[key].push(item);
-        });
-        Object.values(groups).forEach(group => {
-          group.sort((a, b) => {
-            const ao = Number.isFinite(Number(a.order)) ? Number(a.order) : Number.MAX_SAFE_INTEGER;
-            const bo = Number.isFinite(Number(b.order)) ? Number(b.order) : Number.MAX_SAFE_INTEGER;
-            if (ao !== bo) return ao - bo;
-            const ac = Number.isFinite(Number(a.createdAt)) ? Number(a.createdAt) : Number.MAX_SAFE_INTEGER;
-            const bc = Number.isFinite(Number(b.createdAt)) ? Number(b.createdAt) : Number.MAX_SAFE_INTEGER;
-            if (ac !== bc) return ac - bc;
-            return 0;
-          });
-          group.forEach((item, index) => {
-            if (!Number.isFinite(Number(item.order))) item.order = index + 1;
-          });
-        });
-
-        statusText.innerText = "Conectado ao Firebase";
-        loadBlocksAndLessons();
-        loadAvulsas();
-        renderBlocksGrid();
+        await migrateLocalStorageToFirebase();
+        await ensureDefaultCloudData();
+        await syncCountersWithExistingData();
+        await loadCloudCollections();
+        startRealtimeSync();
+        statusText.innerText = 'Conectado ao Firebase';
+        renderAllCloudData();
       } catch (error) {
-        console.error("Erro ao carregar do Firestore: ", error);
-        statusText.innerText = "Erro ao conectar no banco";
+        console.error('Erro ao carregar do Firestore:', error);
+        statusText.innerText = 'Erro ao conectar no banco';
       }
     }
 
-    function saveHistory() { localStorage.setItem('wizard_app_history', JSON.stringify(historyDB)); }
+    async function saveHistoryEntry(entry) {
+      await setDoc(doc(dbCloud, CLOUD_COLLECTIONS.history, `history_${entry.id}`), entry);
+    }
+
+    async function deleteHistoryEntries() {
+      const snapshot = await getDocs(collection(dbCloud, CLOUD_COLLECTIONS.history));
+      await Promise.all(snapshot.docs.map(d => deleteDoc(d.ref)));
+    }
 
     window.handleSearch = function(query) {
       const clearBtn = document.getElementById('clear-search-btn');
@@ -901,13 +1096,17 @@ button{
       `).join('');
     }
 
-    window.clearHistory = function() {
-      if (confirm('Deseja realmente apagar o histórico de treinos?')) {
+    window.clearHistory = async function() {
+      if (!confirm('Deseja realmente apagar o histórico de treinos?')) return;
+      try {
+        await deleteHistoryEntries();
         historyDB = [];
-        saveHistory();
         renderDashboardStats();
         renderHistory();
         renderBlocksGrid();
+      } catch (error) {
+        console.error('Erro ao apagar histórico:', error);
+        alert('Erro ao apagar o histórico do Firebase.');
       }
     }
 
@@ -1240,24 +1439,26 @@ button{
       document.getElementById('modal-add-block').classList.remove('hidden');
     }
 
-    window.deleteBlock = function(blockId) {
-      if (!confirm(`Deseja realmente excluir o bloco "${blocks.find(b => b.id === blockId)?.en || blockId}" e todas as suas lessons?`)) return;
-      
-      // Delete all lessons of this block
-      lessons = lessons.filter(l => l.blockId !== blockId);
-      // Delete all items of this block from Firebase
-      const itemsToDelete = db.filter(i => i.block === blockId);
-      itemsToDelete.forEach(async item => {
-        try {
-          await deleteDoc(doc(dbCloud, "wizard_items", item.id));
-        } catch (e) { console.error("Error deleting item:", e); }
-      });
-      
-      blocks = blocks.filter(b => b.id !== blockId);
-      saveBlocksAndLessons();
-      
-      // Reload data
-      loadDataFromFirebase();
+    window.deleteBlock = async function(blockId) {
+      const block = blocks.find(b => b.id === blockId);
+      if (!confirm(`Deseja realmente excluir o bloco "${block?.en || blockId}" e todas as suas lessons?`)) return;
+
+      try {
+        const lessonsToDelete = lessons.filter(l => l.blockId === blockId);
+        const itemsToDelete = db.filter(i => i.block === blockId);
+
+        await Promise.all([
+          ...lessonsToDelete.map(lesson => deleteDoc(doc(dbCloud, CLOUD_COLLECTIONS.lessons, `lesson_${lesson.id}`))),
+          ...itemsToDelete.map(item => deleteDoc(doc(dbCloud, CLOUD_COLLECTIONS.items, item.id))),
+          deleteDoc(doc(dbCloud, CLOUD_COLLECTIONS.blocks, `block_${blockId}`))
+        ]);
+
+        await loadCloudCollections();
+        renderAllCloudData();
+      } catch (error) {
+        console.error('Erro ao excluir bloco:', error);
+        alert('Erro ao excluir o bloco do Firebase.');
+      }
     }
 
     // Lesson management functions
@@ -1301,11 +1502,16 @@ button{
       document.getElementById('modal-add-avulsa').classList.remove('hidden');
     }
 
-    window.deleteAvulsa = function(id) {
+    window.deleteAvulsa = async function(id) {
       if (!confirm('Deseja realmente excluir esta palavra avulsa?')) return;
-      avulsas = avulsas.filter(a => a.id !== id);
-      saveAvulsas();
-      renderLessonContent();
+      try {
+        await deleteDoc(doc(dbCloud, CLOUD_COLLECTIONS.avulsas, `avulsa_${id}`));
+        await loadCloudCollections();
+        renderLessonContent();
+      } catch (error) {
+        console.error('Erro ao excluir palavra avulsa:', error);
+        alert('Erro ao excluir a palavra avulsa do Firebase.');
+      }
     }
 
     // Populate dropdowns
@@ -1440,83 +1646,99 @@ button{
       }
     });
 
-    document.getElementById('form-add-block').addEventListener('submit', (e) => {
+    document.getElementById('form-add-block').addEventListener('submit', async (e) => {
       e.preventDefault();
       const en = document.getElementById('input-block-en').value.trim();
       const pt = document.getElementById('input-block-pt').value.trim();
-      const editId = document.getElementById('form-add-block').dataset.editId;
+      const form = document.getElementById('form-add-block');
+      const editId = form.dataset.editId;
 
-      if (editId) {
-        // Edit existing block
-        const block = blocks.find(b => b.id === parseInt(editId));
-        if (block) {
-          block.en = en;
-          block.pt = pt;
+      try {
+        if (editId) {
+          await updateDoc(doc(dbCloud, CLOUD_COLLECTIONS.blocks, `block_${editId}`), { en, pt });
+          delete form.dataset.editId;
+        } else {
+          const newId = await allocateNextNumericId(CLOUD_COLLECTIONS.blocks, 'nextBlockId');
+          await setDoc(doc(dbCloud, CLOUD_COLLECTIONS.blocks, `block_${newId}`), {
+            id: newId, en, pt, createdAt: Date.now()
+          });
         }
-        delete document.getElementById('form-add-block').dataset.editId;
-      } else {
-        // Create new block
-        const newId = blocks.length > 0 ? Math.max(...blocks.map(b => b.id)) + 1 : 1;
-        blocks.push({ id: newId, en, pt });
-      }
 
-      saveBlocksAndLessons();
-      closeAddBlockModal();
-      renderBlocksGrid();
+        closeAddBlockModal();
+        await loadCloudCollections();
+        renderBlocksGrid();
+      } catch (error) {
+        console.error('Erro ao salvar bloco no Firebase:', error);
+        alert('Erro ao salvar o bloco no Firebase.');
+      }
     });
 
-    document.getElementById('form-add-lesson').addEventListener('submit', (e) => {
+    document.getElementById('form-add-lesson').addEventListener('submit', async (e) => {
       e.preventDefault();
       const blockId = parseInt(document.getElementById('input-lesson-block').value, 10);
       const en = document.getElementById('input-lesson-en').value.trim();
-      const editId = document.getElementById('form-add-lesson').dataset.editId;
+      const form = document.getElementById('form-add-lesson');
+      const editId = form.dataset.editId;
 
-      if (editId) {
-        // Edit existing lesson
-        const lesson = lessons.find(l => l.id === parseInt(editId));
-        if (lesson) {
-          lesson.blockId = blockId;
-          lesson.en = en;
+      try {
+        if (editId) {
+          const lesson = lessons.find(l => l.id === parseInt(editId, 10));
+          const previousBlockId = lesson?.blockId;
+          await updateDoc(doc(dbCloud, CLOUD_COLLECTIONS.lessons, `lesson_${editId}`), {
+            blockId, en
+          });
+          delete form.dataset.editId;
+
+          // Se a lesson mudou de bloco, os itens existentes continuam preservados
+          // no Firebase, mas passam a apontar para o novo bloco.
+          if (previousBlockId !== blockId) {
+            const affectedItems = db.filter(i => i.lesson === parseInt(editId, 10));
+            await Promise.all(affectedItems.map(item =>
+              updateDoc(doc(dbCloud, CLOUD_COLLECTIONS.items, item.id), { block: blockId })
+            ));
+          }
+        } else {
+          const newId = await allocateNextNumericId(CLOUD_COLLECTIONS.lessons, 'nextLessonId');
+          await setDoc(doc(dbCloud, CLOUD_COLLECTIONS.lessons, `lesson_${newId}`), {
+            id: newId, blockId, en, createdAt: Date.now()
+          });
         }
-        delete document.getElementById('form-add-lesson').dataset.editId;
-      } else {
-        // Create new lesson
-        const blockLessons = lessons.filter(l => l.blockId === blockId);
-        const newId = lessons.length > 0 ? Math.max(...lessons.map(l => l.id)) + 1 : 1;
-        lessons.push({ id: newId, blockId, en });
-      }
 
-      saveBlocksAndLessons();
-      closeAddLessonModal();
-      renderLessonTabs();
-      renderLessonContent();
+        closeAddLessonModal();
+        await loadCloudCollections();
+        renderLessonTabs();
+        renderLessonContent();
+      } catch (error) {
+        console.error('Erro ao salvar lesson no Firebase:', error);
+        alert('Erro ao salvar a lesson no Firebase.');
+      }
     });
 
-    document.getElementById('form-add-avulsa').addEventListener('submit', (e) => {
+    document.getElementById('form-add-avulsa').addEventListener('submit', async (e) => {
       e.preventDefault();
       const id = document.getElementById('input-avulsa-edit-id').value;
       const en = document.getElementById('input-avulsa-en').value.trim();
       const pt = document.getElementById('input-avulsa-pt').value.trim();
       const speech = document.getElementById('input-avulsa-speech').value.trim();
 
-      if (id) {
-        // Edit existing avulsa
-        const item = avulsas.find(a => a.id === id);
-        if (item) {
-          item.en = en;
-          item.pt = pt;
-          item.speech = speech;
+      try {
+        if (id) {
+          await updateDoc(doc(dbCloud, CLOUD_COLLECTIONS.avulsas, `avulsa_${id}`), { en, pt, speech });
+        } else {
+          const newId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+          const maxOrder = avulsas.reduce((max, a) => Math.max(max, normalizeNumber(a.order)), 0);
+          await setDoc(doc(dbCloud, CLOUD_COLLECTIONS.avulsas, `avulsa_${newId}`), {
+            id: newId, en, pt, speech, order: maxOrder + 1, createdAt: Date.now()
+          });
         }
-      } else {
-        // Create new avulsa
-        const newId = Date.now().toString();
-        const maxOrder = avulsas.reduce((max, a) => Math.max(max, a.order || 0), 0);
-        avulsas.push({ id: newId, en, pt, speech, order: maxOrder + 1 });
-      }
 
-      saveAvulsas();
-      closeAddAvulsaModal();
-      renderLessonContent();
+        closeAddAvulsaModal();
+        await loadCloudCollections();
+        renderLessonContent();
+      } catch (error) {
+        console.error('Erro ao salvar palavra avulsa no Firebase:', error);
+        alert('Erro ao salvar a palavra avulsa no Firebase.');
+      }
     });
 
     // Quiz functions
@@ -1685,7 +1907,7 @@ button{
       }
     }
 
-    function finishQuizSession() {
+    async function finishQuizSession() {
       document.getElementById('view-quiz-game').classList.add('hidden');
       document.getElementById('view-quiz-results').classList.remove('hidden');
 
@@ -1700,7 +1922,7 @@ button{
       const now = new Date();
       const dateStr = `${now.toLocaleDateString('pt-BR')} ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 
-      historyDB.unshift({
+      const historyEntry = {
         id: Date.now().toString(),
         date: dateStr,
         block: currentPracticeBlock,
@@ -1708,8 +1930,15 @@ button{
         total: total,
         correct: quizCorrectCount,
         accuracy: accuracy
-      });
-      saveHistory();
+      };
+
+      try {
+        await saveHistoryEntry(historyEntry);
+        historyDB.unshift(historyEntry);
+      } catch (error) {
+        console.error('Erro ao salvar histórico no Firebase:', error);
+        alert('O treino terminou, mas não foi possível salvar o histórico no Firebase.');
+      }
 
       const wrongsWrapper = document.getElementById('quiz-wrongs-wrapper');
       if (quizWrongItems.length > 0) {
